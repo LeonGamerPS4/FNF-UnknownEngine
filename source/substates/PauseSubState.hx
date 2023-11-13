@@ -1,5 +1,7 @@
 package substates;
 
+import flash.system.System;
+
 import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
@@ -17,8 +19,10 @@ class PauseSubState extends MusicBeatSubstate
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to menu'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Modifiers', 'Options', 'Exit'];
 	var difficultyChoices = [];
+	var exitChoices = ['Exit To Song Menu', 'Exit To Main Menu', 'Exit To Title', 'Exit Game', 'BACK'];
+	var charterChoices = ['Skip Time', 'End Song', 'Toggle Practice Mode', 'Toggle Botplay', 'Leave Charting Mode', 'BACK'];
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
@@ -37,20 +41,16 @@ class PauseSubState extends MusicBeatSubstate
 		super();
 		if(Difficulty.list.length < 2) menuItemsOG.remove('Change Difficulty'); //No need to change difficulty if there is only one!
 
-		if(PlayState.chartingMode)
-		{
-			menuItemsOG.insert(2, 'Leave Charting Mode');
-			
-			var num:Int = 0;
-			if(!PlayState.instance.startingSong)
-			{
-				num = 1;
-				menuItemsOG.insert(3, 'Skip Time');
-			}
-			menuItemsOG.insert(3 + num, 'End Song');
-			menuItemsOG.insert(4 + num, 'Toggle Practice Mode');
-			menuItemsOG.insert(5 + num, 'Toggle Botplay');
+		var chartingModeTools:Bool = PlayState.chartingMode;
+		#if debug chartingModeTools = true; #end 
+		menuItemsOG.remove('Charting Mode Options');
+		if(chartingModeTools) {
+			if (!PlayState.chartingMode) charterChoices.remove('Leave Charting Mode');
+			menuItemsOG.remove('Exit');
+			menuItemsOG.push('Charting Mode Options');
+			menuItemsOG.push('Exit');
 		}
+		
 		menuItems = menuItemsOG;
 
 		for (i in 0...Difficulty.list.length) {
@@ -71,7 +71,9 @@ class PauseSubState extends MusicBeatSubstate
 
 		FlxG.sound.list.add(pauseMusic);
 
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		var bg:FlxSprite = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		bg.scale.set(FlxG.width, FlxG.height);
+		bg.updateHitbox();
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
@@ -127,7 +129,9 @@ class PauseSubState extends MusicBeatSubstate
 		grpMenuShit = new FlxTypedGroup<Alphabet>();
 		add(grpMenuShit);
 
-		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		missingTextBG = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		missingTextBG.scale.set(FlxG.width, FlxG.height);
+		missingTextBG.updateHitbox();
 		missingTextBG.alpha = 0.6;
 		missingTextBG.visible = false;
 		add(missingTextBG);
@@ -151,17 +155,19 @@ class PauseSubState extends MusicBeatSubstate
 			pauseMusic.volume += 0.01 * elapsed;
 
 		super.update(elapsed);
+
+		if(controls.BACK)
+		{
+			close();
+			return;
+		}
+
 		updateSkipTextStuff();
-
-		var upP = controls.UI_UP_P;
-		var downP = controls.UI_DOWN_P;
-		var accepted = controls.ACCEPT;
-
-		if (upP)
+		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
 		}
-		if (downP)
+		if (controls.UI_DOWN_P)
 		{
 			changeSelection(1);
 		}
@@ -197,7 +203,7 @@ class PauseSubState extends MusicBeatSubstate
 				}
 		}
 
-		if (accepted && (cantUnpause <= 0 || !controls.controllerMode))
+		if (controls.ACCEPT && (cantUnpause <= 0 || !controls.controllerMode))
 		{
 			if (menuItems == difficultyChoices)
 			{
@@ -232,6 +238,103 @@ class PauseSubState extends MusicBeatSubstate
 
 				menuItems = menuItemsOG;
 				regenMenu();
+				
+			} 
+
+			function exitFromSong()
+			{ 
+				#if desktop DiscordClient.resetClientID(); #end
+				PlayState.deathCounter = 0;
+				PlayState.seenCutscene = false;
+				
+				Mods.loadTopMod();
+				if(PlayState.isStoryMode) {
+					MusicBeatState.switchState(new StoryMenuState());
+				} else {
+					MusicBeatState.switchState(new FreeplayState());
+				}
+				PlayState.cancelMusicFadeTween();
+				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				PlayState.changedDifficulty = false;
+				PlayState.chartingMode = false;
+				FlxG.camera.followLerp = 0;
+			}
+			
+			if (menuItems == exitChoices)
+			{
+				if(menuItems.length - 1 != curSelected && exitChoices.contains(daSelected)) {
+					switch (daSelected)
+					{
+						case "Exit To Song Menu":
+							exitFromSong();
+						case "Exit To Main Menu":
+							PlayState.deathCounter = 0;
+							PlayState.seenCutscene = false;
+							MusicBeatState.switchState(new states.MainMenuState());
+							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+							PlayState.changedDifficulty = false;
+							PlayState.chartingMode = false;
+						case "Exit To Title":
+							PlayState.deathCounter = 0;
+							PlayState.seenCutscene = false;
+							MusicBeatState.switchState(new states.TitleState());
+							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+							PlayState.changedDifficulty = false;
+							PlayState.chartingMode = false;
+						case "Quit Game":
+							System.exit(0);
+					}
+					return;
+				}
+
+				menuItems = menuItemsOG;
+				regenMenu();
+			}
+			
+			if (menuItems == charterChoices)
+			{
+				if(menuItems.length - 1 != curSelected && charterChoices.contains(daSelected)) {
+					switch (daSelected)
+					{
+						case 'Toggle Practice Mode':
+							PlayState.instance.practiceMode = !PlayState.instance.practiceMode;
+							PlayState.changedDifficulty = true;
+							practiceText.visible = PlayState.instance.practiceMode;
+						case 'Toggle Botplay':
+							PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
+							PlayState.changedDifficulty = true;
+							PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
+							PlayState.instance.botplayTxt.alpha = 1;
+							PlayState.instance.botplaySine = 0;
+						case 'Skip Time':
+							if(curTime < Conductor.songPosition)
+							{
+								PlayState.startOnTime = curTime;
+								restartSong(true);
+							}
+							else
+							{
+								if (curTime != Conductor.songPosition)
+								{
+									PlayState.instance.clearNotesBefore(curTime);
+									PlayState.instance.setSongTime(curTime);
+								}
+								close();
+							}
+						case 'End Song':
+							close();
+							PlayState.instance.notes.clear();
+							PlayState.instance.unspawnNotes = [];
+							PlayState.instance.finishSong(true);
+						case "Leave Charting Mode":
+							restartSong();
+							PlayState.chartingMode = false;
+					}
+					return;
+				}
+
+				menuItems = menuItemsOG;
+				regenMenu();
 			}
 
 			switch (daSelected)
@@ -242,41 +345,8 @@ class PauseSubState extends MusicBeatSubstate
 					menuItems = difficultyChoices;
 					deleteSkipTimeText();
 					regenMenu();
-				case 'Toggle Practice Mode':
-					PlayState.instance.practiceMode = !PlayState.instance.practiceMode;
-					PlayState.changedDifficulty = true;
-					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
 					restartSong();
-				case "Leave Charting Mode":
-					restartSong();
-					PlayState.chartingMode = false;
-				case 'Skip Time':
-					if(curTime < Conductor.songPosition)
-					{
-						PlayState.startOnTime = curTime;
-						restartSong(true);
-					}
-					else
-					{
-						if (curTime != Conductor.songPosition)
-						{
-							PlayState.instance.clearNotesBefore(curTime);
-							PlayState.instance.setSongTime(curTime);
-						}
-						close();
-					}
-				case 'End Song':
-					close();
-					PlayState.instance.notes.clear();
-					PlayState.instance.unspawnNotes = [];
-					PlayState.instance.finishSong(true);
-				case 'Toggle Botplay':
-					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
-					PlayState.changedDifficulty = true;
-					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
-					PlayState.instance.botplayTxt.alpha = 1;
-					PlayState.instance.botplaySine = 0;
 				case 'Options':
 					PlayState.instance.paused = true; // For lua
 					PlayState.instance.vocals.volume = 0;
@@ -288,22 +358,13 @@ class PauseSubState extends MusicBeatSubstate
 						FlxG.sound.music.time = pauseMusic.time;
 					}
 					OptionsState.onPlayState = true;
-				case "Exit to menu":
-					#if desktop DiscordClient.resetClientID(); #end
-					PlayState.deathCounter = 0;
-					PlayState.seenCutscene = false;
-
-					Mods.loadTopMod();
-					if(PlayState.isStoryMode) {
-						MusicBeatState.switchState(new StoryMenuState());
-					} else {
-						MusicBeatState.switchState(new FreeplayState());
-					}
-					PlayState.cancelMusicFadeTween();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-					PlayState.changedDifficulty = false;
-					PlayState.chartingMode = false;
-					FlxG.camera.followLerp = 0;
+				case 'Charting Mode Options':
+					menuItems = charterChoices;
+					regenMenu();
+				case 'Exit':
+					menuItems = exitChoices;
+					deleteSkipTimeText();
+					regenMenu();
 			}
 		}
 	}

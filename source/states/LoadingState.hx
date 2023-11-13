@@ -27,6 +27,7 @@ class LoadingState extends MusicBeatState
 	var target:FlxState;
 	var stopMusic = false;
 	var directory:String;
+	public static var globeTrans:Bool = true;
 	var callbacks:MultiCallback;
 	var targetShit:Float = 0;
 
@@ -40,21 +41,92 @@ class LoadingState extends MusicBeatState
 
 	var funkay:FlxSprite;
 	var loadBar:FlxSprite;
+	var tipTxt:FlxText;
+	var tips:Array<String> = [
+		"Don't spam, it won't work.",
+		"psych engine port\nfree clout yay",
+		"why am i wasting my\ntime making this fork",
+		"unknown",
+		"Null Object Reference",
+		"This isn't a kids game.",
+		"This is Psych Engine\nbut content overload.",
+		"No tip here.",
+		"I miss FNF's peak.",
+		"https://github.com/LeonGamerPS4/FunkinRedux",
+		"discord light mode\nbrighter than the fucking sun",
+		"ALT + Enter for free Week 8 /j",
+		"Funk all the way.",
+		"Friday Night Funkin'\nMic'd Up.",
+		"before psych engine there was kade engine\nthose were the days",
+		"You're currently playing FNF Redux v2.5.",
+		"Do people actually read these?",
+		"Skill issue.",
+		"Cock joke.",
+		"WHAT",
+		"As long as there's 2 people left on the planet,\nsomeone is gonna want someone dead.",
+		"His name isn't Keith.",
+		"One arrow is enough.",
+		"THERE AREN'T COUGARS IN MISSIONS",
+		"Disingenuous dense motherfucker.",
+		"My father is dying.\nPlease stop beatboxing.",
+		"pico funny\nbig ol' bunny",
+		"Gettin freaky' on a friday night yeah",
+		"Psych Engine Fork.\nMake fun of me.",
+		"Worjdjhewndjaiqkkwbdjkwqodbdjwoen&:’eked&3rd!2’wonenksiwnwihqbdibejwjebdjjejwjenfjdjejejjwkwiwjnensjsiieejjsjskikdjdnnwjwiwjejdjdjwiejdbdiwjdhehhrifjdnwoqnd",
+		"Oo0ooOoOOo000OOO!!!",
+		"Witness the might\nof the seas!",
+		"DENPA ENGINE SUPREMACY",
+		"CARAMEL ARROW SUPREMACY",
+		"I will rip your intestines out.",
+		"flippity floppity",
+		"i'm surprised people might actually\nbe reading this at this point",
+		"potato\nwaterslide",
+		"GingerBrave\nMore like",
+		"flopknown engine",
+		"I love to smash my keyboard.",
+		"there might be someone out there that's thinking about making a mod about you.\nkeep that in mind.",
+		"Funkin' Forever.",
+		"How to piss off the Psych Discord\nStep 1: make a psych fork and dump wacky ass content into it /j",
+		"WENT BACK TO FREEPLAY??",
+		"Ugh",
+		"Bop beep be be skdoo bep"
+	];
+		
 	override function create()
 	{
-		var bg:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xffcaff4d);
-		bg.antialiasing = ClientPrefs.data.antialiasing;
+		flixel.addons.transition.FlxTransitionableState.skipNextTransIn = false;
+		flixel.addons.transition.FlxTransitionableState.skipNextTransOut = false;
+		if (!globeTrans) {
+			flixel.addons.transition.FlxTransitionableState.skipNextTransIn = true;
+			flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
+		}
+		globeTrans = true;
+		
+		var bg:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('loadBG_Main'));
+		bg.active = false;
+		bg.setGraphicSize(0, FlxG.height);
+		bg.updateHitbox();
+		bg.x = FlxG.width - bg.width;
 		add(bg);
-		funkay = new FlxSprite(0, 0).loadGraphic(Paths.getPath('images/funkay.png', IMAGE));
-		funkay.setGraphicSize(0, FlxG.height);
-		funkay.updateHitbox();
-		add(funkay);
-		funkay.antialiasing = ClientPrefs.data.antialiasing;
-		funkay.scrollFactor.set();
-		funkay.screenCenter();
+		
+		var bottomPanel:FlxSprite = new FlxSprite(0, FlxG.height - 100).makeGraphic(FlxG.width, 100, 0xFF000000);
+		bottomPanel.alpha = 0.5;
+		add(bottomPanel);
+		
+		tipTxt = new FlxText(0, FlxG.height - 80, 1000, "", 26);
+		tipTxt.scrollFactor.set();
+		tipTxt.setFormat("VCR OSD Mono", 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		tipTxt.screenCenter(X);
+		add(tipTxt);
+		
+		var timer = new FlxTimer().start(4, function(tmr:FlxTimer) {
+			tipTxt.text = tips[FlxG.random.int(0,tips.length-1)];
+		}, 0);
 
-		loadBar = new FlxSprite(0, FlxG.height - 20).makeGraphic(FlxG.width, 10, 0xffff16d2);
+		loadBar = new FlxSprite(10, 0).makeGraphic(10, FlxG.height - 150, 0xffffffff);
 		loadBar.screenCenter(X);
+		loadBar.color = 0xffff00ff;
+		loadBar.active = false;
 		add(loadBar);
 		
 		initSongsManifest().onComplete
@@ -68,7 +140,6 @@ class LoadingState extends MusicBeatState
 					if (PlayState.SONG.needsVoices)
 						checkLoadSong(getVocalPath());
 				}
-				checkLibrary("shared");
 				if(directory != null && directory.length > 0 && directory != 'shared') {
 					checkLibrary('week_assets');
 				}
@@ -101,7 +172,7 @@ class LoadingState extends MusicBeatState
 		{
 			@:privateAccess
 			if (!LimeAssets.libraryPaths.exists(library))
-				throw "Missing library: " + library;
+				throw new haxe.Exception("Missing library: " + library);
 
 			var callback = callbacks.add("library:" + library);
 			Assets.loadLibrary(library).onComplete(function (_) { callback(); });
@@ -111,13 +182,6 @@ class LoadingState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		funkay.setGraphicSize(Std.int(0.88 * FlxG.width + 0.9 * (funkay.width - 0.88 * FlxG.width)));
-		funkay.updateHitbox();
-		if(controls.ACCEPT)
-		{
-			funkay.setGraphicSize(Std.int(funkay.width + 60));
-			funkay.updateHitbox();
-		}
 
 		if(callbacks != null) {
 			targetShit = FlxMath.remapToRange(callbacks.numRemaining / callbacks.length, 1, 0, 0, 1);
@@ -162,7 +226,7 @@ class LoadingState extends MusicBeatState
 		#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
 		if (PlayState.SONG != null) {
-			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded("shared") && isLibraryLoaded('week_assets');
+			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded('week_assets');
 		}
 		
 		if (!loaded)

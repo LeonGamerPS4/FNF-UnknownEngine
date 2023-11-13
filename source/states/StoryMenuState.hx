@@ -255,7 +255,7 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
-			MusicBeatState.switchState(new MainMenuState());
+			MusicBeatState.switchState(new GamemodesMenuState());
 		}
 
 		super.update(elapsed);
@@ -326,7 +326,7 @@ class StoryMenuState extends MusicBeatState
 				FreeplayState.destroyFreeplayVocals();
 			});
 			
-			#if MODS_ALLOWED
+			#if (MODS_ALLOWED && cpp)
 			DiscordClient.loadModRPC();
 			#end
 		} else {

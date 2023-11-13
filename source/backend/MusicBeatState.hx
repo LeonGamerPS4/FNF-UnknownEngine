@@ -1,5 +1,9 @@
 package backend;
 
+#if desktop
+import lime.app.Application;
+#end
+
 import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
@@ -19,6 +23,9 @@ class MusicBeatState extends FlxUIState
 	{
 		return Controls.instance;
 	}
+	
+	public static var windowNameSuffix:String = "";
+	public static var windowNamePrefix:String = "Friday Night Funkin' REDUX 2.5";
 
 	public static var camBeat:FlxCamera;
 
@@ -61,6 +68,8 @@ class MusicBeatState extends FlxUIState
 		}
 
 		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
+		
+		Application.current.window.title = windowNamePrefix + windowNameSuffix;
 		
 		stagesFunc(function(stage:BaseStage) {
 			stage.update(elapsed);

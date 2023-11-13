@@ -2,8 +2,6 @@
 
 ## THIS FORK IS STILL IN ALPHA, I CANNOT GUARANTEE THAT BUILDS WILL BE COMPLETELY STABLE
 
-There are no releases on this repository. The only way to download a compiled version of the fork is in the Actions tab.
-
 <details>
   <summary><h2>Installation</h2></summary>
 

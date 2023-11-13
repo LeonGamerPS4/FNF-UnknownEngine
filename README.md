@@ -156,4 +156,3 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 * You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
 * You can enable "Combo Stacking" in Gameplay Options. This causes the combo sprites to just be one sprite with an animation rather than sprites spawning each note hit.
 </details>
- 

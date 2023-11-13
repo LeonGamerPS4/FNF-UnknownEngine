@@ -1,11 +1,18 @@
-# Friday Night Funkin' - Psych Engine
-Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
+# Friday Night Funkin' REDUX (Unknown Engine) (WIP)
 
-## Installation:
-You must have [Haxe](https://haxe.org/download/), installed in order to move on to these next steps
+## THIS FORK IS STILL IN ALPHA, I CANNOT GUARANTEE THAT BUILDS WILL BE COMPLETELY STABLE
+
+There are no releases on this repository. The only way to download a compiled version of the fork is in the Actions tab.
+
+<details>
+  <summary><h2>Installation</h2></summary>
+
+ ### Step 1
+ You must have [Haxe](https://haxe.org/download/), installed in order to move on to these next steps
 
 ------------------
 
+### Step 2
 Go into your `setup` folder located in the root directory of the source code, and execute the respective script for your operating system
 
 `setup-unix.sh` was designed for Linux and Mac, `setup-windows.bat` was designed for (duh) Windows
@@ -20,13 +27,17 @@ for Linux and Mac users, often double clicking on `setup-unix.sh` is the solutio
 
 ------------------
 
-once finished, you should be ready to compile, you can open a terminal in the source code folder, and then type `lime test <target>`
+### Step 3
+Once finished, you should be ready to compile, you can open a terminal in the source code folder, and then type `lime test <target>`
 
 with `<target>` being either `windows`, `mac` or `linux`
 
 If the compiler gives an error saying that hxCodec cannot be found read this issue to fix it: ShadowMario/FNF-PsychEngine#12770
+</details>
 
-## Customization:
+
+<details>
+  <summary><h2>Customization</h2></summary>
 
 if you wish to disable things like *Lua Scripts* or *Video Cutscenes*, you can read over to `Project.xml`
 
@@ -35,25 +46,43 @@ inside `Project.xml`, you will find several variables to customize Psych Engine 
 to start you off, disabling Videos should be simple, simply Delete the line `"VIDEOS_ALLOWED"` or comment it out by wrapping the line in XML-like comments, like this `<!-- YOUR_LINE_HERE -->`
 
 same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, this and other customization options are all available within the `Project.xml` file
+</details>
 
-## Credits:
-* Shadow Mario - Programmer
-* RiverOaken - Artist
-* Yoshubs - Assistant Programmer
+<details>
+  <summary><h2>Credits</h2></summary>
 
-### Special Thanks
-* bbpanzu - Ex-Programmer
-* Yoshubs - New Input System
-* SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
-* KadeDev - Fixed some cool stuff on Chart Editor and other PRs
-* iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
-* PolybiusProxy - .MP4 Video Loader Library (hxCodec)
-* Keoiki - Note Splash Animations
-* Smokey - Sprite Atlas Support
-* Nebula the Zorua - LUA JIT Fork and some Lua reworks
-_____________________________________
+<details>
+  <summary>REDUX Team</summary>
+ 
+- LeonGamer - Programmer
+- AshishXMC - Artist
+- Fastbreak383 - Assistant Programmer
+</details>
+ 
+<details>
+  <summary>Psych Team</summary>
+ 
+- Shadow Mario - Programmer
+- RiverOaken - Artist
+</details>
 
-# Features
+<details>
+  <summary>Special Thanks</summary>
+ 
+- bbpanzu - Ex-Programmer
+- Yoshubs - Ex-Programmer, also made the new input system
+- SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
+- KadeDev - Fixed some cool stuff on Chart Editor and other PRs
+- iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
+- PolybiusProxy - .MP4 Video Loader Library (hxCodec)
+- Keoiki - Note Splash Animations
+- Smokey - Sprite Atlas Support
+- Nebula the Zorua - LUA JIT Fork and some Lua reworks
+</details>
+</details>
+
+<details>
+  <summary><h2>Features</h2></summary>
 
 ## Attractive animated dialogue boxes:
 
@@ -61,7 +90,7 @@ _____________________________________
 
 
 ## Mod Support
-* Probably one of the main points of this engine, you can code in .lua files outside of the source code, making your own weeks without even messing with the source!
+* Probably one of the main points of Psych Engine, you can code in .lua files outside of the source code, making your own weeks without even messing with the source!
 * Comes with a Mod Organizing/Disabling Menu.
 
 
@@ -126,3 +155,4 @@ _____________________________________
 * You can reset your Score on Freeplay/Story Mode by pressing Reset button.
 * You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
 * You can enable "Combo Stacking" in Gameplay Options. This causes the combo sprites to just be one sprite with an animation rather than sprites spawning each note hit.
+</details>

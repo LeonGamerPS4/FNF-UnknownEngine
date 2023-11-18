@@ -308,6 +308,14 @@ class MainMenuState extends MusicBeatState
 					changeItem((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
 				}
 			}
+			
+			#if desktop
+			if (controls.justPressed('debug_1'))
+			{
+				selectedSomethin = true;
+				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+			}
+			#end
 
 			if (controls.BACK)
 			{
@@ -364,13 +372,6 @@ class MainMenuState extends MusicBeatState
 				}
 			}
 		}
-		#if desktop
-		else if (controls.justPressed('debug_1') || FlxG.keys.justPressed.TAB)
-		{
-			selectedSomethin = true;
-			MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-		}
-		#end
 
 		menuItems.forEach(function(spr:FlxSprite)
 		{

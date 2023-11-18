@@ -18,6 +18,8 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxMath;
 
+import states.editors.MasterEditorMenu;
+
 using StringTools;
 
 class GamemodesMenuState extends MusicBeatState
@@ -268,13 +270,6 @@ class GamemodesMenuState extends MusicBeatState
 				});
 			}
 		}
-		#if desktop
-		else if (controls.justPressed('debug_1') || FlxG.keys.justPressed.TAB)
-		{
-			selectedSomethin = true;
-			MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-		}
-		#end
 
 		menuItems.forEach(function(spr:FlxSprite)
 			{

@@ -2,7 +2,10 @@
 
 ## THIS FORK IS STILL IN ALPHA, I CANNOT GUARANTEE THAT BUILDS WILL BE COMPLETELY STABLE
 
-There are no releases on this repository. The only way to download a compiled version of the fork is in the Actions tab.
+No, winning icons won't be making a return.
+Stop using UE 1.4 and older, those versions are outdated and no longer supported.
+
+## WOW ITS YET ANOTHER UNORIGINAL PSYCH FORK!!!
 
 <details>
   <summary><h2>Installation</h2></summary>

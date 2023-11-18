@@ -52,7 +52,7 @@ class MainMenuState extends MusicBeatState
 	public var menuItem:FlxSprite;
 	public var yScroll:Float;
 	
-	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
+	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FC03DB, 0x0));
 	
 	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
 	
@@ -113,6 +113,7 @@ class MainMenuState extends MusicBeatState
 		grid.alpha = 0;
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
+		grid.scrollFactor.set(0, 0);
 
 		beef.scrollFactor.x = 0;
 		beef.scrollFactor.y = 0;
@@ -138,8 +139,6 @@ class MainMenuState extends MusicBeatState
 		add(menuItems);
 
 		var scale:Float = 1;
-
-		var tex = Paths.getSparrowAtlas('FNF_main_menu_assets');
 
 		for (i in 0...optionShit.length)
 		{

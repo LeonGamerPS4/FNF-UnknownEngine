@@ -1,42 +1,53 @@
-package substates;
+package states;
+
+import flixel.util.FlxGradient;
+
+import flixel.addons.display.FlxGridOverlay;
+import flixel.addons.display.FlxBackdrop;
 
 import objects.AttachedText;
 import objects.CheckboxThingie;
 
-class GameplayChangersSubstate extends MusicBeatSubstate
+import substates.PauseSubState;
+
+class ModifiersState extends MusicBeatState
 {
+	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x336FECF7, 0x0));
+	var gradientBar:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
+	var side:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('Modi_Bottom'));
+
 	private var curOption:GameplayOption = null;
 	private var curSelected:Int = 0;
 	private var optionsArray:Array<Dynamic> = [];
+	
+	public static var isPlayState:Bool = false;
+	public static var fromFreeplay:Bool = false;
+	public static var fromCampaign:Bool = false;
 
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private var checkboxGroup:FlxTypedGroup<CheckboxThingie>;
 	private var grpTexts:FlxTypedGroup<AttachedText>;
+	
+	private var descBox:FlxSprite;
+	private var descText:FlxText;
+	
+	var goption:GameplayOption = new GameplayOption('Scroll Type:', "Set the scroll speed type. Multiplicative multiplies the scroll speed, while Constant sets the scroll speed itself. Can be changed with both types.", 'scrolltype', 'string', 'multiplicative', ["multiplicative", "constant"]);
+	var loption:GameplayOption = new GameplayOption('Scroll Speed:', "Set how fast the chart speed is. The higher the amount, the faster the notes go. Can be changed numerically.", 'scrollspeed', 'float', 1);
+	
+	var menuMusic:FlxSound;
 
 	function getOptions()
 	{
-		var goption:GameplayOption = new GameplayOption('Scroll Type', 'scrolltype', 'string', 'multiplicative', ["multiplicative", "constant"]);
 		optionsArray.push(goption);
 
-		var option:GameplayOption = new GameplayOption('Scroll Speed', 'scrollspeed', 'float', 1);
-		option.scrollSpeed = 2.0;
-		option.minValue = 0.35;
-		option.changeValue = 0.05;
-		option.decimals = 2;
-		if (goption.getValue() != "constant")
-		{
-			option.displayFormat = '%vX';
-			option.maxValue = 3;
-		}
-		else
-		{
-			option.displayFormat = "%v";
-			option.maxValue = 6;
-		}
-		optionsArray.push(option);
+		loption.scrollSpeed = 2.0;
+		loption.minValue = 0.35;
+		loption.changeValue = 0.05;
+		loption.decimals = 2;	
+		optionsArray.push(loption);
 
 		#if FLX_PITCH
-		var option:GameplayOption = new GameplayOption('Playback Rate', 'songspeed', 'float', 1);
+		var option:GameplayOption = new GameplayOption('Playback Rate:', "Change the speed of the song and its pitch. 1.2 is Hifi, 0.8 is Lofi, but you can set it to anything from 0.5 to 3. Can be changed numerically.", 'songspeed', 'float', 1);
 		option.scrollSpeed = 1;
 		option.minValue = 0.5;
 		option.maxValue = 3.0;
@@ -46,7 +57,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		optionsArray.push(option);
 		#end
 
-		var option:GameplayOption = new GameplayOption('Health Gain Multiplier', 'healthgain', 'float', 1);
+		var option:GameplayOption = new GameplayOption('Health Gain Multiplier:', "Set how fast you can regain your health. The higher, the faster you can regenerate health. Can be changed numerically.", 'healthgain', 'float', 1);
 		option.scrollSpeed = 2.5;
 		option.minValue = 0;
 		option.maxValue = 5;
@@ -54,7 +65,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		var option:GameplayOption = new GameplayOption('Health Loss Multiplier', 'healthloss', 'float', 1);
+		var option:GameplayOption = new GameplayOption('Health Loss Multiplier:', "Set how fast you can lose your health, or not lose any at all. The higher, the faster you can lose health. Can be changed numerically.", 'healthloss', 'float', 1);
 		option.scrollSpeed = 2.5;
 		option.minValue = 0.5;
 		option.maxValue = 5;
@@ -62,9 +73,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		optionsArray.push(new GameplayOption('Instakill on Miss', 'instakill', 'bool', false));
-		optionsArray.push(new GameplayOption('Practice Mode', 'practice', 'bool', false));
-		optionsArray.push(new GameplayOption('Botplay', 'botplay', 'bool', false));
+		optionsArray.push(new GameplayOption('Instakill on Miss', "Miss once, it's game over. Can be switched on or off.", 'instakill', 'bool', false));
+		optionsArray.push(new GameplayOption('Practice Mode', "Baby mode initiate. Practice your songs however you want, you won't be dying anytime soon. Score will not be saved. Can be switched on or off.", 'practice', 'bool', false));
+		optionsArray.push(new GameplayOption('Botplay', "Just let a bot play for you. Useful for showcase videos and impossible songs. Score will not be saved. Can be switched on or off.", 'botplay', 'bool', false));
 	}
 
 	public function getOptionByName(name:String)
@@ -78,13 +89,39 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		return null;
 	}
 
+	private var bg:FlxSprite;
+	
 	public function new()
 	{
 		super();
 		
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-		bg.alpha = 0.6;
+		menuMusic = new FlxSound();
+		menuMusic.loadEmbedded(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), true, true);
+		menuMusic.volume = 0;
+		menuMusic.play(false, FlxG.random.int(0, Std.int(menuMusic.length / 2)));
+
+		FlxG.sound.list.add(menuMusic);
+		
+		bg = new FlxSprite(0, 0).loadGraphic(Paths.image('modiBG_Main'));
+		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
+		
+		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x5585BDFF, 0xAAECE2FF], 1, 90, true); 
+		gradientBar.y = FlxG.height - gradientBar.height;
+		add(gradientBar);
+		gradientBar.scrollFactor.set(0, 0);
+
+		grid.velocity.set(40, 40);
+		grid.alpha = 0;
+		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
+		add(grid);
+
+		side.scrollFactor.x = 0;
+		side.scrollFactor.y = 0;
+		side.antialiasing = true;
+		side.screenCenter();
+		add(side);
+		side.y = FlxG.height - side.height;
 
 		// avoids lagspikes while scrolling through menus!
 		grpOptions = new FlxTypedGroup<Alphabet>();
@@ -95,6 +132,16 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		checkboxGroup = new FlxTypedGroup<CheckboxThingie>();
 		add(checkboxGroup);
+		
+		descBox = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		descBox.alpha = 0.6;
+		add(descBox);
+
+		descText = new FlxText(50, 600, 1180, "", 32);
+		descText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		descText.scrollFactor.set();
+		descText.borderSize = 2.4;
+		add(descText);
 		
 		getOptions();
 
@@ -130,26 +177,64 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		changeSelection();
 		reloadCheckboxes();
+		
+		if(ClientPrefs.data.pauseMusic != 'None')
+		{
+			FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), menuMusic.volume);
+			FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
+			FlxG.sound.music.time = menuMusic.time;
+		}
 	}
 
 	var nextAccept:Int = 5;
 	var holdTime:Float = 0;
 	var holdValue:Float = 0;
 	override function update(elapsed:Float)
-	{
+	{	
+		if (goption.getValue() != "constant")
+		{
+			loption.displayFormat = '%vX';
+			loption.maxValue = 3;
+		}
+		else
+		{
+			loption.displayFormat = "%v";
+			loption.maxValue = 6;
+		}
+		
 		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
 		}
+		
 		if (controls.UI_DOWN_P)
 		{
 			changeSelection(1);
 		}
 
+		if(FlxG.mouse.wheel != 0)
+		{
+			changeSelection(-FlxG.mouse.wheel);
+		}
+
 		if (controls.BACK) {
-			close();
 			ClientPrefs.saveSettings();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
+			TitleState.isPlaying = false;
+			if (isPlayState)
+			{
+				backend.StageData.loadDirectory(PlayState.SONG);
+				MusicBeatState.switchState(new PlayState());
+				FlxG.sound.music.stop();
+			}
+			else if (fromFreeplay) {		
+				MusicBeatState.switchState(new FreeplayState());
+			} else if (fromCampaign) {			
+				MusicBeatState.switchState(new StoryMenuState());
+			} else {
+				MusicBeatState.switchState(new GamemodesMenuState());
+			}
 		}
 
 		if(nextAccept <= 0)
@@ -321,6 +406,10 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			curSelected = optionsArray.length - 1;
 		if (curSelected >= optionsArray.length)
 			curSelected = 0;
+			
+		descText.text = optionsArray[curSelected].description;
+		descText.screenCenter(Y);
+		descText.y += 270;
 
 		var bullShit:Int = 0;
 
@@ -339,6 +428,11 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				text.alpha = 1;
 			}
 		}
+		
+		descBox.setPosition(descText.x - 10, descText.y - 10);
+		descBox.setGraphicSize(Std.int(descText.width + 20), Std.int(descText.height + 25));
+		descBox.updateHitbox();
+		
 		curOption = optionsArray[curSelected]; //shorter lol
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
@@ -374,11 +468,13 @@ class GameplayOption
 	public var decimals:Int = 1; //Only used in float/percent type
 
 	public var displayFormat:String = '%v'; //How String/Float/Percent/Int values are shown, %v = Current value, %d = Default value
+	public var description:String = '';
 	public var name:String = 'Unknown';
 
-	public function new(name:String, variable:String, type:String = 'bool', defaultValue:Dynamic = 'null variable value', ?options:Array<String> = null)
+	public function new(name:String, description:String = '', variable:String, type:String = 'bool', defaultValue:Dynamic = 'null variable value', ?options:Array<String> = null)
 	{
 		this.name = name;
+		this.description = description;
 		this.variable = variable;
 		this.type = type;
 		this.defaultValue = defaultValue;

@@ -42,6 +42,7 @@ class SaveVariables {
 	public var noReset:Bool = false;
 	public var healthBarAlpha:Float = 1;
 	public var hitsoundVolume:Float = 0;
+	public var menuMusic:String = 'Gettin\' Freaky (Hydra Remix)';
 	public var pauseMusic:String = 'Tea Time';
 	public var checkForUpdates:Bool = true;
 	public var comboStacking:Bool = true;

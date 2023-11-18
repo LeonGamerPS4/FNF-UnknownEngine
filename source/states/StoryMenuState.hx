@@ -10,12 +10,15 @@ import flixel.graphics.FlxGraphic;
 import objects.MenuItem;
 import objects.MenuCharacter;
 
-import substates.GameplayChangersSubstate;
+import states.ModifiersState;
+
 import substates.ResetScoreSubState;
 
 class StoryMenuState extends MusicBeatState
 {
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
+	
+	var blankBG:FlxSprite;
 
 	var scoreText:FlxText;
 
@@ -45,6 +48,14 @@ class StoryMenuState extends MusicBeatState
 	{
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
+		
+		if (!TitleState.isPlaying)
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		
+		blankBG = new FlxSprite().loadGraphic(Paths.image('bBG_Main'));
+		blankBG.screenCenter();
+		blankBG.alpha = 0;
+		add(blankBG);
 
 		PlayState.isStoryMode = true;
 		WeekData.reloadWeekFiles(true);
@@ -237,7 +248,10 @@ class StoryMenuState extends MusicBeatState
 			if(FlxG.keys.justPressed.CONTROL)
 			{
 				persistentUpdate = false;
-				openSubState(new GameplayChangersSubstate());
+				FlxG.sound.music.stop();
+				TitleState.isPlaying = false;
+				ModifiersState.fromCampaign = true;
+				MusicBeatState.switchState(new ModifiersState());
 			}
 			else if(controls.RESET)
 			{
@@ -255,6 +269,8 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
+			TitleState.isPlaying = true;
+			ModifiersState.fromCampaign = false;
 			MusicBeatState.switchState(new GamemodesMenuState());
 		}
 
@@ -319,10 +335,12 @@ class StoryMenuState extends MusicBeatState
 				}
 				stopspamming = true;
 			}
+			
+			FlxTween.tween(blankBG, {alpha: 1}, 0.3, {ease: FlxEase.quartInOut});
 
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
-				LoadingState.loadAndSwitchState(new PlayState(), true);
+				openSubState(new substates.ChartSubstate());
 				FreeplayState.destroyFreeplayVocals();
 			});
 			

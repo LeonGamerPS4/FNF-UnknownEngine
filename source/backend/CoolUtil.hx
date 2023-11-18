@@ -21,6 +21,12 @@ class CoolUtil
 	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
 		return Math.max(min, Math.min(max, value));
 	}
+	
+	inline public static function clamp(value:Float, min:Float, max:Float):Float
+		return Math.max(min, Math.min(max, value));
+
+	inline public static function iclamp(val:Float, min:Int, max:Int):Int
+		return Math.floor(Math.max(min, Math.min(max, val)));
 
 	inline public static function coolTextFile(path:String):Array<String>
 	{

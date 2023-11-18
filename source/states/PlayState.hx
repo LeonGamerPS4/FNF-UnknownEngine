@@ -595,12 +595,12 @@ class PlayState extends MusicBeatState
 		versionTxt.scrollFactor.set();
 		uiGroup.add(versionTxt);
 
-		botplayTxt = new FlxText(400, timeBar.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt = new FlxText(850, timeBar.y + 670, FlxG.width - 800, "Botplay is enabled, Score won't be saved.", 32);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
-		//uiGroup.add(botplayTxt);
+		uiGroup.add(botplayTxt);
 		if(ClientPrefs.data.downScroll)
 			botplayTxt.y = timeBar.y - 78;
 			
@@ -2357,6 +2357,7 @@ class PlayState extends MusicBeatState
 				if (storyPlaylist.length <= 0)
 				{
 					Mods.loadTopMod();
+					TitleState.isPlaying = true;
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					#if desktop DiscordClient.resetClientID(); #end
 
@@ -2398,6 +2399,7 @@ class PlayState extends MusicBeatState
 			{
 				trace('WENT BACK TO FREEPLAY??');
 				Mods.loadTopMod();
+				TitleState.isPlaying = true;
 				#if desktop DiscordClient.resetClientID(); #end
 
 				cancelMusicFadeTween();

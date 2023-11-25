@@ -62,7 +62,7 @@ class NotesSubState extends MusicBeatSubstate
 		gradientBar.y = FlxG.height - gradientBar.height;
 		gradientBar.scrollFactor.set(0, 0);
 		add(gradientBar);
-
+	
 		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFE100, 0x0));
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;

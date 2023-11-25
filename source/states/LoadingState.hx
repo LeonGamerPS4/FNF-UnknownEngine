@@ -14,9 +14,11 @@ import backend.StageData;
 
 import haxe.io.Path;
 
+import backend.MusicBeatState;
+
 class LoadingState extends MusicBeatState
 {
-	inline static var MIN_TIME = 1.0;
+	inline static final MIN_TIME = 1.0;
 
 	// Browsers will load create(), you can make your song load a custom directory there
 	// If you're compiling to desktop (or something that doesn't use NO_PRELOAD_ALL), search for getNextState instead
@@ -28,6 +30,7 @@ class LoadingState extends MusicBeatState
 	var stopMusic = false;
 	var directory:String;
 	public static var globeTrans:Bool = true;
+	public static var silentLoading:Bool = false;
 	var callbacks:MultiCallback;
 	var targetShit:Float = 0;
 
@@ -38,9 +41,10 @@ class LoadingState extends MusicBeatState
 		this.stopMusic = stopMusic;
 		this.directory = directory;
 	}
-
-	var funkay:FlxSprite;
+	
 	var loadBar:FlxSprite;
+	var loadingCirc:FlxSprite;
+	var loadingCircSpeed = FlxG.random.int(50,200);
 	var tipTxt:FlxText;
 	var tips:Array<String> = [
 		"Don't spam, it won't work.",
@@ -91,9 +95,14 @@ class LoadingState extends MusicBeatState
 		"Ugh",
 		"Bop beep be be skdoo bep"
 	];
-		
+	var silent:Bool = false;
+	
 	override function create()
 	{
+		Paths.clearUnusedMemory();
+		silent = silentLoading;
+		silentLoading = false;
+
 		flixel.addons.transition.FlxTransitionableState.skipNextTransIn = false;
 		flixel.addons.transition.FlxTransitionableState.skipNextTransOut = false;
 		if (!globeTrans) {
@@ -101,33 +110,42 @@ class LoadingState extends MusicBeatState
 			flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
 		}
 		globeTrans = true;
-		
-		var bg:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('loadBG_Main'));
-		bg.active = false;
-		bg.setGraphicSize(0, FlxG.height);
-		bg.updateHitbox();
-		bg.x = FlxG.width - bg.width;
-		add(bg);
-		
-		var bottomPanel:FlxSprite = new FlxSprite(0, FlxG.height - 100).makeGraphic(FlxG.width, 100, 0xFF000000);
-		bottomPanel.alpha = 0.5;
-		add(bottomPanel);
-		
-		tipTxt = new FlxText(0, FlxG.height - 80, 1000, "", 26);
-		tipTxt.scrollFactor.set();
-		tipTxt.setFormat("VCR OSD Mono", 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		tipTxt.screenCenter(X);
-		add(tipTxt);
-		
-		var timer = new FlxTimer().start(4, function(tmr:FlxTimer) {
-			tipTxt.text = tips[FlxG.random.int(0,tips.length-1)];
-		}, 0);
 
-		loadBar = new FlxSprite(10, 0).makeGraphic(10, FlxG.height - 150, 0xffffffff);
-		loadBar.screenCenter(X);
-		loadBar.color = 0xffff00ff;
-		loadBar.active = false;
-		add(loadBar);
+		if (!silent) {
+			var loading:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('loadBG_Main'));
+			loading.active = false;
+			loading.setGraphicSize(0, FlxG.height);
+			loading.updateHitbox();
+			loading.x = FlxG.width - loading.width;
+			add(loading);
+		
+			loadingCirc = new FlxSprite(0, 0).loadGraphic(Paths.image('loadingicon'));
+			loadingCirc.scale.set(0.45,0.45);
+			loadingCirc.updateHitbox();
+			loadingCirc.screenCenter(Y);
+			loadingCirc.active = false;
+			add(loadingCirc);
+	
+			loadBar = new FlxSprite(10, 0).makeGraphic(10, FlxG.height - 150, 0xffffffff);
+			loadBar.screenCenter(Y);
+			loadBar.color = 0xffff00ff;
+			loadBar.active = false;
+			add(loadBar);
+	
+			final loadColors:Array<flixel.util.FlxColor> = [0xffff0000, 0xffff7b00, 0xffffff00, 0xff00ff00, 0xff0000ff, 0xffff00ff];
+			var loadIncrement:Int = 0;
+			clrBarTwn(loadIncrement, loadBar, loadColors, 1);
+	
+			tipTxt = new FlxText(0, FlxG.height - 48, 0, tips[FlxG.random.int(0,tips.length-1)]);
+			tipTxt.scrollFactor.set();
+			tipTxt.setFormat("VCR OSD Mono", 16, 0xffffffff, LEFT);
+			tipTxt.active = false;
+			add(tipTxt);
+	
+			var timer = new FlxTimer().start(4, function(tmr:FlxTimer) {
+				tipTxt.text = tips[FlxG.random.int(0,tips.length-1)];
+			}, 0);
+		}
 		
 		initSongsManifest().onComplete
 		(
@@ -157,10 +175,6 @@ class LoadingState extends MusicBeatState
 		{
 			var library = Assets.getLibrary("songs");
 			final symbolPath = path.split(":").pop();
-			// @:privateAccess
-			// library.types.set(symbolPath, SOUND);
-			// @:privateAccess
-			// library.pathGroups.set(symbolPath, [library.__cacheBreak(symbolPath)]);
 			var callback = callbacks.add("song:" + path);
 			Assets.loadSound(path).onComplete(function (_) { callback(); });
 		}
@@ -182,21 +196,32 @@ class LoadingState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		if (silent) return;
+
+		loadingCirc.angle += elapsed*loadingCircSpeed;
 
 		if(callbacks != null) {
 			targetShit = FlxMath.remapToRange(callbacks.numRemaining / callbacks.length, 1, 0, 0, 1);
-			loadBar.scale.x += 0.5 * (targetShit - loadBar.scale.x);
+			loadBar.scale.y += 0.5 * (targetShit - loadBar.scale.y);
 		}
 	}
+
+	function clrBarTwn(incrementor:Int, sprite:FlxSprite, clrArray:Array<flixel.util.FlxColor>, duration:Int) {
+		flixel.tweens.FlxTween.color(sprite, duration, sprite.color, clrArray[incrementor], {onComplete: function(_) {
+			incrementor++;
+			if (incrementor > 5) incrementor = 0;
+			clrBarTwn(incrementor, sprite, clrArray, duration);
+		}});
+	}
 	
-	function onLoad()
+	inline function onLoad()
 	{
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
-		
+			
 		MusicBeatState.switchState(target);
 	}
-	
+
 	static function getSongPath()
 	{
 		return Paths.inst(PlayState.SONG.song);
@@ -221,12 +246,12 @@ class LoadingState extends MusicBeatState
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		trace('Setting asset folder to ' + directory);
+		//trace('Setting asset folder to ' + directory);
 
 		#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
 		if (PlayState.SONG != null) {
-			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded('week_assets');
+			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) isLibraryLoaded('week_assets');
 		}
 		
 		if (!loaded)
@@ -239,13 +264,13 @@ class LoadingState extends MusicBeatState
 	}
 	
 	#if NO_PRELOAD_ALL
-	static function isSoundLoaded(path:String):Bool
+	inline static function isSoundLoaded(path:String):Bool
 	{
 		trace(path);
 		return Assets.cache.hasSound(path);
 	}
 	
-	static function isLibraryLoaded(library:String):Bool
+	inline static function isLibraryLoaded(library:String):Bool
 	{
 		return Assets.getLibrary(library) != null;
 	}
@@ -375,7 +400,9 @@ class MultiCallback
 	inline function log(msg):Void
 	{
 		if (logId != null)
+		{
 			trace('$logId: $msg');
+		}
 	}
 	
 	public function getFired() return fired.copy();

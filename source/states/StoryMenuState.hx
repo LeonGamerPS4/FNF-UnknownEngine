@@ -55,9 +55,9 @@ class StoryMenuState extends MusicBeatState
 		blankBG = new FlxSprite().loadGraphic(Paths.image('bBG_Main'));
 		blankBG.screenCenter();
 		blankBG.alpha = 0;
-		add(blankBG);
 
 		PlayState.isStoryMode = true;
+		PlayState.isEndless = false;
 		WeekData.reloadWeekFiles(true);
 		if(curWeek >= WeekData.weeksList.length) curWeek = 0;
 		persistentUpdate = persistentDraw = true;
@@ -182,6 +182,8 @@ class StoryMenuState extends MusicBeatState
 		// add(rankText);
 		add(scoreText);
 		add(txtWeekTitle);
+		
+		add(blankBG);
 
 		changeWeek();
 		changeDifficulty();
@@ -303,6 +305,7 @@ class StoryMenuState extends MusicBeatState
 			{
 				PlayState.storyPlaylist = songArray;
 				PlayState.isStoryMode = true;
+				PlayState.isEndless = false;
 				selectedWeek = true;
 	
 				var diffic = Difficulty.getFilePath(curDifficulty);
@@ -336,7 +339,7 @@ class StoryMenuState extends MusicBeatState
 				stopspamming = true;
 			}
 			
-			FlxTween.tween(blankBG, {alpha: 1}, 0.3, {ease: FlxEase.quartInOut});
+			FlxTween.tween(blankBG, {alpha: 1}, 1.1, {ease: FlxEase.quartInOut});
 
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{

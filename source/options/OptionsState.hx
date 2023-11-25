@@ -118,8 +118,9 @@ class OptionsState extends MusicBeatState
 			if(onPlayState)
 			{
 				StageData.loadDirectory(PlayState.SONG);
-				MusicBeatState.switchState(new PlayState());
-				FlxG.sound.music.volume = 0;
+				LoadingState.globeTrans = false;
+				LoadingState.loadAndSwitchState(new PlayState());
+				FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
 			}
 			else MusicBeatState.switchState(new MainMenuState());
 		}

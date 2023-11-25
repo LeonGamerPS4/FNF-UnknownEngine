@@ -11,12 +11,15 @@ class SaveVariables {
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
+	public var ratingSystem:String = 'Default';
 	public var showFPS:Bool = true;
 	public var flashing:Bool = true;
 	public var autoPause:Bool = true;
 	public var antialiasing:Bool = true;
 	public var noteSkin:String = 'Default';
 	public var splashSkin:String = 'Psych';
+	public var scoreType:String = 'REDUX';
+	public var iconBop:String = 'Bop';
 	public var splashAlpha:Float = 0.6;
 	public var lowQuality:Bool = false;
 	public var shaders:Bool = true;
@@ -42,6 +45,7 @@ class SaveVariables {
 	public var noReset:Bool = false;
 	public var healthBarAlpha:Float = 1;
 	public var hitsoundVolume:Float = 0;
+	public var hitsoundType:String = 'osu! (Default)';
 	public var menuMusic:String = 'Gettin\' Freaky (Hydra Remix)';
 	public var pauseMusic:String = 'Tea Time';
 	public var checkForUpdates:Bool = true;

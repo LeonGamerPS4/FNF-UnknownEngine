@@ -2112,7 +2112,7 @@ class ChartingState extends MusicBeatState
 					if(!playedSound[data]) {
 						if(note.hitsoundChartEditor && ((playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress)))
 						{
-							var soundToPlay = note.hitsound;
+							var soundToPlay = ClientPrefs.data.hitsoundType;
 							if(_song.player1 == 'gf') //Easter egg
 								soundToPlay = 'GF_' + Std.string(data + 1);
 

@@ -28,7 +28,13 @@ class GamemodesMenuState extends MusicBeatState
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
 
-	var optionShit:Array<String> = ['week', 'freeplay',/* 'marathon', 'endless', 'survival',*/ 'modifier'];
+	var optionShit:Array<String> = [
+		'week', 
+		'freeplay',
+		//'marathon', 
+		//'endless', 
+		//'survival', 
+		'modifier'];
 	var camFollow:FlxObject;
 
 	var bg:FlxSprite = new FlxSprite(-89).loadGraphic(Paths.image('pBG_Main'));
@@ -261,10 +267,10 @@ class GamemodesMenuState extends MusicBeatState
 								case 'survival':
 									FlxG.switchState(new MenuSurvival());
 									DiscordClient.changePresence("This feels like TDI already",  null);
+								*/									
 								case 'endless':
-									FlxG.switchState(new MenuEndless());
+									MusicBeatState.switchState(new EndlessState());
 									DiscordClient.changePresence("Endless easy SMM2 moment",  null);
-								*/
 							}
 						});
 				});

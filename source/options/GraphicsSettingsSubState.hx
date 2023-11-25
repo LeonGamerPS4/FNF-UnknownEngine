@@ -13,12 +13,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	{
 		title = 'Graphics';
 		rpcTitle = 'Graphics Settings Menu'; //for Discord Rich Presence
-		
-		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
-		grid.velocity.set(40, 40);
-		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
-		//add(grid);
 
 		boyfriend = new Character(840, 170, 'bf', true);
 		boyfriend.setGraphicSize(Std.int(boyfriend.width * 0.75));
@@ -99,6 +93,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	override function changeSelection(change:Int = 0)
 	{
 		super.changeSelection(change);
-		boyfriend.visible = (antialiasingOption == curSelected);
+		//boyfriend.visible = (antialiasingOption == curSelected);
 	}
 }

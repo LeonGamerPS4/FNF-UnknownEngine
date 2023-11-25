@@ -104,12 +104,12 @@ class TitleState extends MusicBeatState
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.data.checkForUpdates && !closedState) {
 			trace('checking for update');
-			var http = new haxe.Http("https://raw.githubusercontent.com/ShadowMario/FNF-PsychEngine/main/gitVersion.txt");
+			var http = new haxe.Http("https://raw.githubusercontent.com/LeonGamerPS4/FNF-Redux/main/gitVersion.txt");
 
 			http.onData = function (data:String)
 			{
 				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.psychEngineVersion.trim();
+				var curVersion:String = MainMenuState.funkinReduxVersion.trim();
 				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
 					trace('versions arent matching!');
@@ -561,39 +561,72 @@ class TitleState extends MusicBeatState
 
 	function createCoolText(textArray:Array<String>, ?offset:Float = 0)
 	{
-		for (i in 0...textArray.length)
+		if (!ModsMenuState.waitingToRestart)
 		{
-			var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
-			money.x = -1500;
-			FlxTween.quadMotion(money, -300, -100, 30 
-				+ (i * 70), 150 
-				+ (i * 130), 100 
-				+ (i * 70), 
-				80 
-				+ (i * 130), 0.4, true, {
-					ease: FlxEase.quadInOut
-				});
-			if(credGroup != null && textGroup != null) {
-				credGroup.add(money);
-				textGroup.add(money);
+			for (i in 0...textArray.length)
+			{
+				var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
+				money.x = -1500;
+				FlxTween.quadMotion(money, -300, -100, 30 
+					+ (i * 70), 150 
+					+ (i * 130), 100 
+					+ (i * 70), 
+					80 
+					+ (i * 130), 0.4, true, {
+						ease: FlxEase.quadInOut
+					});
+				if(credGroup != null && textGroup != null) {
+					credGroup.add(money);
+					textGroup.add(money);
+				}
+			}
+		}
+		else
+		{
+			for (i in 0...textArray.length)
+			{
+				var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
+				money.screenCenter(X);
+				money.y += (i * 60) + 200 + offset;
+				if(credGroup != null && textGroup != null) {
+					credGroup.add(money);
+					textGroup.add(money);
+				}
+				money.y -= 350;
+				FlxTween.tween(money, {y: money.y + 350}, 0.5, {ease: FlxEase.expoOut, startDelay: 0.0});
 			}
 		}
 	}
 
 	function addMoreText(text:String, ?offset:Float = 0)
 	{
-		if(textGroup != null && credGroup != null) {
-			var coolText:Alphabet = new Alphabet(0, 0, text, true);
-			FlxTween.quadMotion(coolText, -300, -100, 10
-				+ (textGroup.length * 40), 150
-				+ (textGroup.length * 130), 30
-				+ (textGroup.length * 40),
-				80
-				+ (textGroup.length * 130), 0.4, true, {
-					ease: FlxEase.quadInOut
-				});
-			credGroup.add(coolText);
-			textGroup.add(coolText);
+		if (!ModsMenuState.waitingToRestart)
+		{
+			if(textGroup != null && credGroup != null) {
+				var coolText:Alphabet = new Alphabet(0, 0, text, true);
+				FlxTween.quadMotion(coolText, -300, -100, 10
+					+ (textGroup.length * 40), 150
+					+ (textGroup.length * 130), 30
+					+ (textGroup.length * 40),
+					80
+					+ (textGroup.length * 130), 0.4, true, {
+						ease: FlxEase.quadInOut
+					});
+				credGroup.add(coolText);
+				textGroup.add(coolText);
+			}
+		}
+		else
+		{
+			if(textGroup != null && credGroup != null) {
+				var coolText:Alphabet = new Alphabet(0, 0, text, true);
+				coolText.screenCenter(X);
+				coolText.y += (textGroup.length * 60) + 200 + offset;
+				credGroup.add(coolText);
+				textGroup.add(coolText);
+				coolText.y += 750;
+				FlxTween.tween(coolText, {y: coolText.y - 750}, 0.5, {ease: FlxEase.expoOut, startDelay: 0.0});
+			}
 		}
 	}
 
@@ -662,16 +695,23 @@ class TitleState extends MusicBeatState
 					createCoolText(['In association', 'with'], -40);
 					#end
 				case 8:
-					psychSpr.x = -1500;
-					psychSpr.visible = true;
-					FlxTween.quadMotion(psychSpr, -700, -700, 50
-						+ (textGroup.length * 130), 150
-						+ (textGroup.length * 50), 100
-						+ (textGroup.length * 130),
-						80
-						+ (textGroup.length * 50), 0.4, true, {
-							ease: FlxEase.quadInOut
-						});
+					if (!ModsMenuState.waitingToRestart)
+					{
+						psychSpr.x = -1500;
+						psychSpr.visible = true;
+						FlxTween.quadMotion(psychSpr, -700, -700, 50
+							+ (textGroup.length * 130), 150
+							+ (textGroup.length * 50), 100
+							+ (textGroup.length * 130),
+							80
+							+ (textGroup.length * 50), 0.4, true, {
+								ease: FlxEase.quadInOut
+							});
+					}
+					else
+					{
+						psychSpr.visible = true;
+					}
 				case 9:
 					deleteCoolText();
 					psychSpr.visible = false;

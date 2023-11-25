@@ -17,13 +17,11 @@ import flixel.util.FlxGradient;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 
-class FreeplayState extends MusicBeatState
+class EndlessState extends MusicBeatState
 {
-	var songs:Array<SongMetadata> = [];
+	var songs:Array<EndlessSongMetadata> = [];
 
 	var selector:FlxText;
-	var selectedSomethin:Bool = false;
-	var selectable:Bool = false;
 	private static var curSelected:Int = 0;
 	var lerpSelected:Float = 0;
 	var curDifficulty:Int = -1;
@@ -80,7 +78,7 @@ class FreeplayState extends MusicBeatState
 		
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
-		PlayState.isEndless = false;
+		PlayState.isEndless = true;
 		WeekData.reloadWeekFiles(false);
 
 		#if desktop
@@ -258,11 +256,6 @@ class FreeplayState extends MusicBeatState
 		switchPlayMusic();
 		updateTexts();
 		super.create();
-		
-		new FlxTimer().start(0.5, function(tmr:FlxTimer)
-		{
-			selectable = true;
-		});
 	}
 
 	override function closeSubState() {
@@ -271,9 +264,9 @@ class FreeplayState extends MusicBeatState
 		super.closeSubState();
 	}
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
+	function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
 	{
-		songs.push(new SongMetadata(songName, weekNum, songCharacter, color));
+		songs.push(new EndlessSongMetadata(songName, weekNum, songCharacter, color));
 	}
 
 	function weekIsLocked(name:String):Bool {
@@ -508,7 +501,6 @@ class FreeplayState extends MusicBeatState
 			}
 			else 
 			{
-				selectedSomethin = true;
 				persistentUpdate = false;
 				if(colorTween != null) {
 					colorTween.cancel();
@@ -522,7 +514,6 @@ class FreeplayState extends MusicBeatState
 
 		if(FlxG.keys.justPressed.CONTROL && !playingMusic)
 		{
-			selectedSomethin = true;
 			persistentUpdate = false;
 			FlxG.sound.music.stop();
 			MusicBeatState.switchState(new ModifiersState());
@@ -602,9 +593,8 @@ class FreeplayState extends MusicBeatState
 				vocals.time = 0;
 		}
 
-		else if (controls.ACCEPT && !playingMusic && !selectedSomethin && selectable)
+		else if (controls.ACCEPT && !playingMusic)
 		{
-			selectedSomethin = true;
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 			var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
@@ -623,7 +613,7 @@ class FreeplayState extends MusicBeatState
 			{
 				PlayState.SONG = Song.loadFromJson(poop, songLowercase);
 				PlayState.isStoryMode = false;
-				PlayState.isEndless = false;
+				PlayState.isEndless = true;
 				PlayState.storyDifficulty = curDifficulty;
 
 				trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
@@ -649,7 +639,6 @@ class FreeplayState extends MusicBeatState
 			}
 
 			FlxG.sound.play(Paths.sound('confirmMenu'));
-			TitleState.isPlaying = true;
 			
 			FlxTween.tween(bg, {alpha: 0}, 0.6, {ease: FlxEase.quartInOut, startDelay: 0.3});
 			FlxTween.tween(scoreText, {y: 750, alpha: 0}, 0.8, {ease: FlxEase.quartInOut, startDelay: 0.3});
@@ -664,7 +653,6 @@ class FreeplayState extends MusicBeatState
 			{
 				FlxTween.tween(item, {alpha: 0}, 0.9, {ease: FlxEase.quartInOut});
 			}
-		
 
 			new FlxTimer().start(0.9, function(tmr:FlxTimer)
 			{
@@ -1026,7 +1014,7 @@ class FreeplayState extends MusicBeatState
 	#end
 }
 
-class SongMetadata
+class EndlessSongMetadata
 {
 	public var songName:String = "";
 	public var week:Int = 0;

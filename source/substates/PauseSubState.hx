@@ -12,6 +12,7 @@ import flixel.util.FlxStringUtil;
 
 import states.StoryMenuState;
 import states.FreeplayState;
+import states.EndlessState;
 import states.ModifiersState;
 import options.OptionsState;
 
@@ -252,11 +253,13 @@ class PauseSubState extends MusicBeatSubstate
 				ModifiersState.isPlayState = false;
 				states.TitleState.isPlaying = true;
 				
-				if(PlayState.isStoryMode) {
+				if (PlayState.isStoryMode)
 					MusicBeatState.switchState(new StoryMenuState());
-				} else {
+				else if (PlayState.isEndless)
+					MusicBeatState.switchState(new EndlessState());
+				else
 					MusicBeatState.switchState(new FreeplayState());
-				}
+					
 				
 				PlayState.cancelMusicFadeTween();
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));

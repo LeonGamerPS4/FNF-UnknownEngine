@@ -90,8 +90,24 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What should the Time Bar display?",
 			'timeBarType',
 			'string',
-			['Time Left', 'Time Elapsed', 'Time Elapsed / Length', 'Song Name', 'Disabled']);
+			['Time Left', 'Time Elapsed', 'Elapsed / Length', 'Song Name', 'Disabled']);
 		addOption(option);
+		
+		var option:Option = new Option('Score Bar:',
+			"What should the Score Bar display as?",
+			'scoreType',
+			'string',
+			['REDUX', 'Psych', 'Kade', 'FPS+', 'YoshiCrafter', 'Disabled']);
+		addOption(option);
+		
+		/*
+		var option:Option = new Option('Icon Bop:',
+			"Select an icon bop type.",
+			'iconBop',
+			'string',
+			['Bop', 'Slide (Horizontal)', 'Slide (Vertical)', 'Disabled']);
+		addOption(option);
+		*/
 
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",

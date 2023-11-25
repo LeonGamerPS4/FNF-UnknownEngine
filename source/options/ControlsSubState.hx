@@ -48,14 +48,17 @@ class ControlsSubState extends MusicBeatSubstate
 	static var defaultKey:String = 'Reset to Default Keys';
 
 	var bg:FlxSprite;
+	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x336FECF7, 0x0));
+	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
+	
 	var grpDisplay:FlxTypedGroup<Alphabet>;
 	var grpBlacks:FlxTypedGroup<AttachedSprite>;
 	var grpOptions:FlxTypedGroup<Alphabet>;
 	var grpBinds:FlxTypedGroup<Alphabet>;
 	var selectSpr:AttachedSprite;
 
-	var gamepadColor:FlxColor = 0xfffd7194;
-	var keyboardColor:FlxColor = 0xff7192fd;
+	var gamepadColor:FlxColor = 0xffff0392;
+	var keyboardColor:FlxColor = 0xffff6c03;
 	var onKeyboardMode:Bool = true;
 	
 	var controllerSpr:FlxSprite;
@@ -74,11 +77,18 @@ class ControlsSubState extends MusicBeatSubstate
 		bg.screenCenter();
 		add(bg);
 
-		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
+		grid.scrollFactor.set(0, 0.07);
+		
+		var side:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('SideControls'));
+		side.scrollFactor.x = 0;
+		side.scrollFactor.y = 0;
+		side.antialiasing = ClientPrefs.data.antialiasing;
+		add(side);
+		side.x = 0;
 
 		grpDisplay = new FlxTypedGroup<Alphabet>();
 		add(grpDisplay);
@@ -94,13 +104,13 @@ class ControlsSubState extends MusicBeatSubstate
 		grpBinds = new FlxTypedGroup<Alphabet>();
 		add(grpBinds);
 
-		controllerSpr = new FlxSprite(50, 40).loadGraphic(Paths.image('controllertype'), true, 82, 60);
+		controllerSpr = new FlxSprite(-50, 40).loadGraphic(Paths.image('controllertype'), true, 82, 60);
 		controllerSpr.antialiasing = ClientPrefs.data.antialiasing;
 		controllerSpr.animation.add('keyboard', [0], 1, false);
 		controllerSpr.animation.add('gamepad', [1], 1, false);
 		add(controllerSpr);
 
-		var text:Alphabet = new Alphabet(60, 90, 'CTRL', false);
+		var text:Alphabet = new Alphabet(-60, 90, 'CTRL', false);
 		text.alignment = CENTERED;
 		text.setScale(0.4);
 		add(text);

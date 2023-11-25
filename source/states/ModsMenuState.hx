@@ -730,7 +730,7 @@ class ModsMenuState extends MusicBeatState
 		}
 	}
 
-	var waitingToRestart:Bool = false;
+	public static var waitingToRestart:Bool = false;
 	function moveModToPosition(?mod:String = null, position:Int = 0)
 	{
 		if(mod == null) mod = modsList.all[curSelectedMod];

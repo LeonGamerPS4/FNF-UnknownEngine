@@ -25,7 +25,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var funkinReduxVersion:String = '2.5'; // Used for OutdatedState
+	public static var funkinReduxVersion:String = '2.5 PRE 3'; // Used for OutdatedState and PlayState
 	public static var micdUpVersion:String = '2.0.3';
 	public static var psychEngineVersion:String = '0.7.2';
 	
@@ -365,6 +365,7 @@ class MainMenuState extends MusicBeatState
 								case 'credits':
 									MusicBeatState.switchState(new CreditsState());
 								case 'options':
+									options.OptionsState.onPlayState = false;
 									LoadingState.loadAndSwitchState(new options.OptionsState());
 							}
 						});

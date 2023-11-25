@@ -41,6 +41,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 		
+		var option:Option = new Option('Rating System:',
+			'Which rating system would you like to use?',
+			'ratingSystem',
+			'string',
+			['Default', 'Psych', 'Kade']);
+		addOption(option);
+		
 		var option:Option = new Option('Auto Pause',
 			"If checked, the game automatically pauses if the screen isn't on focus.",
 			'autoPause',
@@ -53,9 +60,39 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'noReset',
 			'bool');
 		addOption(option);
+		
+		var option:Option = new Option('Hitsound Type:',
+			'Funny notes play the selected sound when you hit them.',
+			'hitsoundType',
+			'string',
+			['Absorb', 
+			'Audience', 
+			'Beep', 
+			'Beep 2', 
+			'Bells', 
+			'Bells 2', 
+			'Bongo', 
+			'Clank', 
+			'Clank 2', 
+			'Clap', 
+			'Clap 2', 
+			'Clap 3', 
+			'Cymbal', 
+			'Drum', 
+			'Echoclap', 
+			'Golf Hit', 
+			'Hi-hat', 
+			'Key Jingling', 
+			'osu! (Default)', 
+			'Shot', 
+			'Snare', 
+			'Switch', 
+			'Wood']);
+		addOption(option);
+		option.onChange = onChangeHitsoundType;
 
 		var option:Option = new Option('Hitsound Volume',
-			'Funny notes does \"Tick!\" when you hit them."',
+			'Sets the volume of the funny notes\' sounds.',
 			'hitsoundVolume',
 			'percent');
 		addOption(option);
@@ -124,9 +161,14 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 
 		super();
 	}
+	
+	function onChangeHitsoundType()
+	{
+		FlxG.sound.play(Paths.sound(ClientPrefs.data.hitsoundType));
+	}
 
 	function onChangeHitsoundVolume()
-		FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.data.hitsoundVolume);
+		FlxG.sound.play(Paths.sound(ClientPrefs.data.hitsoundType), ClientPrefs.data.hitsoundVolume);
 
 	function onChangeAutoPause()
 		FlxG.autoPause = ClientPrefs.data.autoPause;

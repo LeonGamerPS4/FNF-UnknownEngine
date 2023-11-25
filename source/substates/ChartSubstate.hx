@@ -167,6 +167,7 @@ class ChartSubstate extends MusicBeatSubstate
                 FlxTween.tween(FlxG.camera, { zoom:1.4}, 1.3, { ease: FlxEase.quartInOut});
                 FlxTween.tween(camFollow, { y:5000}, 1.3, { ease: FlxEase.quartInOut});
 
+				boombox.antialiasing = ClientPrefs.data.antialiasing;
                 add(boombox);
 			    boombox.scale.set(0,0);
                 boombox.scrollFactor.set();
@@ -184,6 +185,7 @@ class ChartSubstate extends MusicBeatSubstate
 					if (FlxG.keys.pressed.SHIFT) {
 						LoadingState.loadAndSwitchState(new ChartingState());
 					} else {
+						LoadingState.globeTrans = false;
 						LoadingState.loadAndSwitchState(new PlayState());
 					}
 				});

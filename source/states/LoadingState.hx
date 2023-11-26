@@ -56,7 +56,7 @@ class LoadingState extends MusicBeatState
 		"This is Psych Engine\nbut content overload.",
 		"No tip here.",
 		"I miss FNF's peak.",
-		"https://github.com/LeonGamerPS4/FunkinRedux",
+		"https://github.com/LeonGamerPS4/FNF-Redux",
 		"discord light mode\nbrighter than the fucking sun",
 		"ALT + Enter for free Week 8 /j",
 		"Funk all the way.",

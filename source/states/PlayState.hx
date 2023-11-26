@@ -32,6 +32,7 @@ import states.editors.CharacterEditorState;
 
 import substates.PauseSubState;
 import substates.GameOverSubstate;
+import substates.RankingSubstate;
 
 #if !flash 
 import flixel.addons.display.FlxRuntimeShader;
@@ -248,10 +249,10 @@ class PlayState extends MusicBeatState
 	var judgementCounterTween:FlxTween;
 	var versionTxt:FlxText;
 	
-	var sicks:Int = 0;
-	var goods:Int = 0;
-	var bads:Int = 0;
-	var shits:Int = 0;
+	public static var sicks:Int = 0;
+	public static var goods:Int = 0;
+	public static var bads:Int = 0;
+	public static var shits:Int = 0;
 	
 	var notesPerSecond:Int = 0;
 	var npsArray:Array<Date> = [];
@@ -783,16 +784,6 @@ class PlayState extends MusicBeatState
 			MusicBeatState.windowNameSuffix = " - " + SONG.song + " (Charting Mode, Paused)";
 		}
 		#end
-		
-		if (customTransition && loading != null) {
-			FlxTween.tween(loading, {alpha: 0}, 0.45, {
-				onComplete: _ -> {
-					remove(loading, true);
-					loading.destroy();
-				}
-			});
-		}
-		customTransition = true;
 
 		//PRECACHING MISS SOUNDS BECAUSE I THINK THEY CAN LAG PEOPLE AND FUCK THEM UP IDK HOW HAXE WORKS
 		if(ClientPrefs.data.hitsoundVolume > 0) precacheList.set('hitsound', 'sound');
@@ -812,6 +803,16 @@ class PlayState extends MusicBeatState
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		callOnScripts('onCreatePost');
+		
+		if (customTransition && loading != null) {
+			FlxTween.tween(loading, {alpha: 0}, 0.45, {
+				onComplete: _ -> {
+					remove(loading, true);
+					loading.destroy();
+				}
+			});
+		}
+		customTransition = true;
 
 		cacheCountdown();
 		cachePopUpScore();
@@ -895,12 +896,25 @@ class PlayState extends MusicBeatState
 	}
 
 	public function reloadHealthBarColors() {
-		healthBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
-			FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
+		if (ClientPrefs.data.coloredHealthBar) {
+			healthBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
+				FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
+		} else {
+			healthBar.setColors(0xFFFF0000, 0xFF66FF33);
+		}
 	}
 	
 	public function reloadTimeBarColors() {
-		timeBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
+		if (ClientPrefs.data.timeBarColor == 'REDUX') {
+			timeBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), 
+				0xFF696969);
+		} else if (ClientPrefs.data.timeBarColor == 'REDUX Classic') {
+			timeBar.setColors(0xFF73FF91, 0xFF8C8C8C);
+		} else if (ClientPrefs.data.timeBarColor == 'Psych') {
+			timeBar.setColors(0xFFFFFFFF, 0xFF000000);
+		} else if (ClientPrefs.data.timeBarColor == 'Kade') {
+			timeBar.setColors(0xFF73FF91, 0xFF000000);
+		}
 	}
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
@@ -1306,7 +1320,7 @@ class PlayState extends MusicBeatState
 	
 	var healthTxt:String = '';
 	var str:String = "?";
-	var accPercent:Float;
+	public static var accPercent:Float;
 
 	public function updateScore(miss:Bool = false)
 	{
@@ -2633,6 +2647,14 @@ class PlayState extends MusicBeatState
 
 				if (storyPlaylist.length <= 0)
 				{
+					new FlxTimer().start(0.1, function(tmr:FlxTimer)
+					{
+						camHUD.alpha -= 1 / 10;	
+					}, 10);
+
+					openSubState(new RankingSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+					
+					/*
 					Mods.loadTopMod();
 					TitleState.isPlaying = true;
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
@@ -2643,7 +2665,8 @@ class PlayState extends MusicBeatState
 						CustomFadeTransition.nextCamera = null;
 					}
 					MusicBeatState.switchState(new StoryMenuState());
-
+					*/
+					
 					// if ()
 					if(!ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay')) {
 						StoryMenuState.weekCompleted.set(WeekData.weeksList[storyWeek], true);
@@ -2652,7 +2675,7 @@ class PlayState extends MusicBeatState
 						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
 						FlxG.save.flush();
 					}
-					changedDifficulty = false;
+					//changedDifficulty = false;
 				}
 				else
 				{
@@ -2661,8 +2684,8 @@ class PlayState extends MusicBeatState
 					trace('LOADING NEXT SONG');
 					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
 
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
+					//FlxTransitionableState.skipNextTransIn = true;
+					//FlxTransitionableState.skipNextTransOut = true;
 					prevCamFollow = camFollow;
 
 					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
@@ -2674,11 +2697,20 @@ class PlayState extends MusicBeatState
 						case 'roses || thorns':
 							LoadingState.globeTrans = false;
 					}		
+					customTransition = false;
 					LoadingState.loadAndSwitchState(new PlayState());
 				}
 			}
 			else
 			{
+				new FlxTimer().start(0.1, function(tmr:FlxTimer)
+				{
+					camHUD.alpha -= 1 / 10;
+				}, 10);
+
+				openSubState(new RankingSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+				
+				/*
 				trace('WENT BACK TO FREEPLAY??');
 				Mods.loadTopMod();
 				TitleState.isPlaying = true;
@@ -2691,6 +2723,7 @@ class PlayState extends MusicBeatState
 				MusicBeatState.switchState(new FreeplayState());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
+				*/
 			}
 			transitioning = true;
 		}
@@ -3787,6 +3820,20 @@ class PlayState extends MusicBeatState
 			
 		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')';
 		updateScoreTxt();
+	}
+	
+	public function generateRanking(comboRank:String)
+	{	
+		if (songMisses == 0 && bads == 0 && shits == 0 && goods == 0) // Marvelous (SICK) Full Combo
+			RankingSubstate.comboRank = "MFC";
+		else if (songMisses == 0 && bads == 0 && shits == 0 && goods >= 1) // Good Full Combo (Nothing but Goods & Sicks)
+			RankingSubstate.comboRank = "GFC";
+		else if (songMisses == 0 && bads >= 1 && shits == 0 && goods >= 0) // Alright Full Combo (Bads, Goods and Sicks)
+			RankingSubstate.comboRank = "AFC";
+		else if (songMisses == 0) // Regular FC
+			RankingSubstate.comboRank = "FC";
+		else if (songMisses < 10) // Single Digit Combo Breaks
+			RankingSubstate.comboRank = "SDCB";
 	}
 
 	#if ACHIEVEMENTS_ALLOWED

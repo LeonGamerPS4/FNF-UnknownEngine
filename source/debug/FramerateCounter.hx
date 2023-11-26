@@ -72,6 +72,8 @@ class FramerateCounter extends TextField
 		+ '\nREDUX v' + states.MainMenuState.funkinReduxVersion;
 
 		textColor = 0xFFFFFFFF;
+		if (ClientPrefs.data.colorblindMode == "Invert")
+			textColor = 0xFF000000;
 		if (currentFPS < FlxG.drawFramerate * 0.5)
 			textColor = 0xFFFF0000;
 	}

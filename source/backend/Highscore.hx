@@ -5,12 +5,14 @@ class Highscore
 	public static var weekScores:Map<String, Int> = new Map();
 	public static var songScores:Map<String, Int> = new Map<String, Int>();
 	public static var songRating:Map<String, Float> = new Map<String, Float>();
+	public static var songRanks:Map<String, Int> = new Map<String, Int>();
 
 	public static function resetSong(song:String, diff:Int = 0):Void
 	{
 		var daSong:String = formatSong(song, diff);
 		setScore(daSong, 0);
 		setRating(daSong, 0);
+		setRank(daSong, 0);
 	}
 
 	public static function resetWeek(week:String, diff:Int = 0):Void
@@ -33,6 +35,19 @@ class Highscore
 			setScore(daSong, score);
 			if(rating >= 0) setRating(daSong, rating);
 		}
+	}
+
+	public static function saveRank(song:String, score:Int = 0, ?diff:Int = 0):Void
+	{
+		var daSong:String = formatSong(song, diff);
+
+		if (songRanks.exists(daSong))
+		{
+			if (songRanks.get(daSong) > score)
+				setRank(daSong, score);
+		}
+		else
+			setRank(daSong, score);
 	}
 
 	public static function saveWeekScore(week:String, score:Int = 0, ?diff:Int = 0):Void
@@ -73,6 +88,14 @@ class Highscore
 		FlxG.save.data.songRating = songRating;
 		FlxG.save.flush();
 	}
+	
+	static function setRank(song:String, score:Int):Void
+	{
+		// Reminder that I don't need to format this song, it should come formatted!
+		songRanks.set(song, score);
+		FlxG.save.data.songRanks = songRanks;
+		FlxG.save.flush();
+	}
 
 	public static function formatSong(song:String, diff:Int):String
 	{
@@ -95,6 +118,14 @@ class Highscore
 			setRating(daSong, 0);
 
 		return songRating.get(daSong);
+	}
+	
+	public static function getRank(song:String, diff:Int):Int
+	{
+		if (!songRanks.exists(formatSong(song, diff)))
+			setRank(formatSong(song, diff), 16);
+
+		return songRanks.get(formatSong(song, diff));
 	}
 
 	public static function getWeekScore(week:String, diff:Int):Int
@@ -119,6 +150,10 @@ class Highscore
 		if (FlxG.save.data.songRating != null)
 		{
 			songRating = FlxG.save.data.songRating;
+		}
+		if (FlxG.save.data.songRanks != null)
+		{
+			songRanks = FlxG.save.data.songRanks;
 		}
 	}
 }

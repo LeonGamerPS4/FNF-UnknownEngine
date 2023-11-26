@@ -47,10 +47,6 @@ class FreeplayState extends MusicBeatState
 
 	var theicon:HealthIcon;
 
-	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
-	
-	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFFFFFFF);
-
 	var curTime:Float;
 
 	private var grpSongs:FlxTypedGroup<Alphabet>;
@@ -59,8 +55,18 @@ class FreeplayState extends MusicBeatState
 	private var iconArray:Array<HealthIcon> = [];
 
 	var bg:FlxSprite;
+	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFFFFF, 0x0));
+	//var checker:FlxBackdrop = new FlxBackdrop(Paths.image('Free_Checker'), 0.2, 0.2, true, true);
+	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
 	var intendedColor:Int;
+	var intendedColor2:Int;
 	var colorTween:FlxTween;
+	
+	var rankTable:Array<String> = [
+		'P-small', 'X-small', 'X--small', 'SS+-small', 'SS-small', 'SS--small', 'S+-small', 'S-small', 'S--small', 'A+-small', 'A-small', 'A--small',
+		'B-small', 'C-small', 'D-small', 'E-small', 'NA'
+	];
+	var rank:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('rankings/NA'));
 
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
@@ -122,6 +128,15 @@ class FreeplayState extends MusicBeatState
 		add(bg);
 		bg.alpha = 1;
 		bg.screenCenter();
+		
+		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x55FFBDF8, 0xAAFFFDF3], 1, 90, true);
+		gradientBar.y = FlxG.height - gradientBar.height;
+		add(gradientBar);
+		gradientBar.scrollFactor.set(0, 0);
+
+		grid.velocity.set(10, 25);
+		add(grid);
+		grid.alpha = 1;
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
@@ -157,6 +172,15 @@ class FreeplayState extends MusicBeatState
 		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
 		add(scoreBG);
+		
+		rank.scale.x = rank.scale.y = 80 / rank.height;
+		rank.updateHitbox();
+		rank.antialiasing = true;
+		rank.scrollFactor.set();
+		rank.y = 105;
+		rank.x = 1150;
+		add(rank);
+		rank.antialiasing = ClientPrefs.data.antialiasing;
 
 		songBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 100, 0xFF000000);
 		songBG.alpha = 0.6;
@@ -205,15 +229,6 @@ class FreeplayState extends MusicBeatState
 		playbackTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE);
 		playbackTxt.visible = false;
 		add(playbackTxt);
-		
-		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x55AE59E4, 0xAA19ECFF], 1, 90, true);
-		gradientBar.y = FlxG.height - gradientBar.height;
-		//add(gradientBar);
-		gradientBar.scrollFactor.set(0, 0);
-		
-		grid.velocity.set(40, 40);
-		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 
 		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		missingTextBG.alpha = 0.6;
@@ -228,7 +243,9 @@ class FreeplayState extends MusicBeatState
 
 		if(curSelected >= songs.length) curSelected = 0;
 		bg.color = songs[curSelected].color;
+		grid.color = songs[curSelected].color;
 		intendedColor = bg.color;
+		intendedColor2 = grid.color;
 		lerpSelected = curSelected;
 
 		curDifficulty = Math.round(Math.max(0, Difficulty.defaultList.indexOf(lastDifficultyName)));
@@ -242,7 +259,7 @@ class FreeplayState extends MusicBeatState
 		bottomBG.alpha = 0.6;
 		add(bottomBG);
 
-		leText = "Press SPACE to listen to the Song / Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
+		leText = "Press SPACE to listen to the Song. / Press CTRL to open the Modifier Menu. / Press RESET to Reset your Score, Rank, and Accuracy.";
 		bottomString = leText;
 		var size:Int = 16;
 		bottomText = new FlxText(bottomBG.x, bottomBG.y + 4, FlxG.width, leText, size);
@@ -652,7 +669,10 @@ class FreeplayState extends MusicBeatState
 			TitleState.isPlaying = true;
 			
 			FlxTween.tween(bg, {alpha: 0}, 0.6, {ease: FlxEase.quartInOut, startDelay: 0.3});
+			FlxTween.tween(grid, {alpha: 0}, 0.6, {ease: FlxEase.quartInOut});
+			FlxTween.tween(gradientBar, {alpha: 0}, 0.6, {ease: FlxEase.quartInOut, startDelay: 0.3});
 			FlxTween.tween(scoreText, {y: 750, alpha: 0}, 0.8, {ease: FlxEase.quartInOut, startDelay: 0.3});
+			FlxTween.tween(rank, {y: 750, alpha: 0}, 0.8, {ease: FlxEase.quartInOut, startDelay: 0.3});
 			FlxTween.tween(diffText, {y: 750, alpha: 0}, 0.8, {ease: FlxEase.quartInOut});
 			FlxTween.tween(songBG, {y: 750, alpha: 0}, 0.8, {ease: FlxEase.quartInOut});
 			FlxTween.tween(bottomText, {y: 750, alpha: 0}, 0.8, {ease: FlxEase.quartInOut});
@@ -753,6 +773,14 @@ class FreeplayState extends MusicBeatState
 		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 		intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
+
+		rank.loadGraphic(Paths.image('rankings/' + rankTable[Highscore.getRank(songs[curSelected].songName, curDifficulty)]));
+		rank.scale.x = rank.scale.y = 80 / rank.height;
+		rank.updateHitbox();
+		rank.antialiasing = ClientPrefs.data.antialiasing;
+		rank.scrollFactor.set();
+		rank.y = 105;
+		rank.x = 1150;
 		#end
 
 		lastDifficultyName = Difficulty.getString(curDifficulty);
@@ -783,17 +811,35 @@ class FreeplayState extends MusicBeatState
 			curSelected = 0;
 			
 		var newColor:Int = songs[curSelected].color;
-		if(newColor != intendedColor) {
+		var newColor2:Int = songs[curSelected].color;
+		if(newColor != intendedColor && newColor2 != intendedColor2) {
 			if(colorTween != null) {
 				colorTween.cancel();
 			}
 			intendedColor = newColor;
+			intendedColor2 = newColor2;
 			colorTween = FlxTween.color(bg, 1, bg.color, intendedColor, {
 				onComplete: function(twn:FlxTween) {
 					colorTween = null;
 				}
 			});
+			
+			colorTween = FlxTween.color(grid, 1, grid.color, intendedColor2, {
+				onComplete: function(twn:FlxTween) {
+					colorTween = null;
+				}
+			});
 		}
+		
+		#if !switch
+		rank.loadGraphic(Paths.image('rankings/' + rankTable[Highscore.getRank(songs[curSelected].songName, curDifficulty)]));
+		rank.scale.x = rank.scale.y = 80 / rank.height;
+		rank.updateHitbox();
+		rank.antialiasing = ClientPrefs.data.antialiasing;
+		rank.scrollFactor.set();
+		rank.y = 105;
+		rank.x = 1150;
+		#end
 
 		// selector.y = (70 * curSelected) + 30;
 
@@ -1032,6 +1078,7 @@ class SongMetadata
 	public var week:Int = 0;
 	public var songCharacter:String = "";
 	public var color:Int = -7179779;
+	public var gridColor:String = "";
 	public var folder:String = "";
 	public var lastDifficulty:String = null;
 
@@ -1041,6 +1088,7 @@ class SongMetadata
 		this.week = week;
 		this.songCharacter = songCharacter;
 		this.color = color;
+		//this.gridColor = color;
 		this.folder = Mods.currentModDirectory;
 		if(this.folder == null) this.folder = '';
 	}

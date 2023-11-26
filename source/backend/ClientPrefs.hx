@@ -19,6 +19,7 @@ class SaveVariables {
 	public var noteSkin:String = 'Default';
 	public var splashSkin:String = 'Psych';
 	public var scoreType:String = 'REDUX';
+	public var coloredHealthBar:Bool = true;
 	public var iconBop:String = 'Bop';
 	public var splashAlpha:Float = 0.6;
 	public var lowQuality:Bool = false;
@@ -39,8 +40,10 @@ class SaveVariables {
 		[0xFF71E300, 0xFFF6FFE6, 0xFF003100],
 		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]];
 
+	public var colorblindMode:String = 'None';
 	public var ghostTapping:Bool = true;
-	public var timeBarType:String = 'Time Left';
+	public var timeBarType:String = 'Elapsed / Length';
+	public var timeBarColor:String = 'REDUX';	
 	public var scoreZoom:Bool = true;
 	public var noReset:Bool = false;
 	public var healthBarAlpha:Float = 1;

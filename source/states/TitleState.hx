@@ -1,5 +1,6 @@
 package states;
 
+import backend.ColorblindFilters;
 import backend.WeekData;
 import backend.Highscore;
 
@@ -201,6 +202,8 @@ class TitleState extends MusicBeatState
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 			}
 		}
+		
+		ColorblindFilters.applyFiltersOnGame();
 
 		Conductor.bpm = titleJSON.bpm;
 		persistentUpdate = true;

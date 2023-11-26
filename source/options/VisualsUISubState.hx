@@ -114,6 +114,14 @@ class VisualsUISubState extends BaseOptionsMenu
 			'flashing',
 			'bool');
 		addOption(option);
+		
+		var option:Option = new Option('Color Filters:',
+			"Change how colors of the game work, either for fun or if you're colorblind.",
+			'colorblindMode',
+			'string',
+			['None', 'Deuteranopia', 'Protanopia', 'Tritanopia', 'Virtual Boy', 'Gameboy', 'Downer', 'Grayscale', 'Invert']);
+		option.onChange = backend.ColorblindFilters.applyFiltersOnGame;
+		addOption(option);
 
 		var option:Option = new Option('Camera Zooms',
 			"If unchecked, the camera won't zoom in on a beat hit.",
@@ -125,6 +133,19 @@ class VisualsUISubState extends BaseOptionsMenu
 			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
 			'scoreZoom',
 			'bool');
+		addOption(option);
+		
+		var option:Option = new Option('Icon Colored Health Bar',
+			"If unchecked, the health bar will have set colors\nrather than colors based on the icons.",
+			'coloredHealthBar',
+			'bool');
+		addOption(option);
+		
+		var option:Option = new Option('Time Bar Colors:',
+			"What colors should the Time Bar display?",
+			'timeBarColor',
+			'string',
+			['REDUX', 'REDUX Classic', 'Psych', 'Kade']);
 		addOption(option);
 
 		var option:Option = new Option('Health Bar Opacity',

@@ -41,6 +41,18 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 		
+		var option:Option = new Option('Judgement Counter',
+			"If unchecked, the judgement counter gets hidden.",
+			'judgementCounter',
+			'bool');
+		addOption(option);
+		
+		var option:Option = new Option('Display MS Offset On Note Hits',
+			'If checked, an offset (in milliseconds) will appear near notes.',
+			'showMsText',
+			'bool');
+		addOption(option);
+		
 		var option:Option = new Option('Rating System:',
 			'Which rating system would you like to use?',
 			'ratingSystem',
@@ -111,6 +123,16 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.scrollSpeed = 20;
 		option.minValue = -30;
 		option.maxValue = 30;
+		addOption(option);
+		
+		var option:Option = new Option('Perfect! Hit Window',
+			'Changes the amount of time you have\nfor hitting a "Perfect!" in milliseconds.',
+			'perfectWindow',
+			'int');
+		option.displayFormat = '%vms';
+		option.scrollSpeed = 15;
+		option.minValue = 10;
+		option.maxValue = 20;
 		addOption(option);
 
 		var option:Option = new Option('Sick! Hit Window',

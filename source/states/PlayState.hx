@@ -249,6 +249,13 @@ class PlayState extends MusicBeatState
 	var judgementCounterTween:FlxTween;
 	var versionTxt:FlxText;
 	
+	var allNotesMs:Float = 0;
+	var averageMs:Float = 0;
+	
+	var msTimeTxt:FlxText;
+	var msTimeTxtTween:FlxTween;
+	
+	public static var perfects:Int = 0;
 	public static var sicks:Int = 0;
 	public static var goods:Int = 0;
 	public static var bads:Int = 0;
@@ -336,11 +343,12 @@ class PlayState extends MusicBeatState
 
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
-			
-		sicks = ratingsData[0].hits;
-		goods = ratingsData[1].hits;
-		bads = ratingsData[2].hits;
-		shits = ratingsData[3].hits;
+
+		perfects = ratingsData[0].hits;			
+		sicks = ratingsData[1].hits;
+		goods = ratingsData[2].hits;
+		bads = ratingsData[3].hits;
+		shits = ratingsData[4].hits;
 		
 		if (ClientPrefs.data.ratingSystem == 'Default')
 		{
@@ -701,6 +709,7 @@ class PlayState extends MusicBeatState
 		judgementCounter.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		judgementCounter.scrollFactor.set();
 		judgementCounter.screenCenter(Y);
+		judgementCounter.visible = ClientPrefs.data.judgementCounter;
 		uiGroup.add(judgementCounter);
 		
 		versionTxt = new FlxText(0, FlxG.height - 18, 0, SONG.song + " - " +
@@ -709,15 +718,20 @@ class PlayState extends MusicBeatState
 		versionTxt.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionTxt.scrollFactor.set();
 		uiGroup.add(versionTxt);
+		
+		msTimeTxt = new FlxText(0, 0, 400, "", 32);
+		msTimeTxt.setFormat(Paths.font('vcr.ttf'), 32, FlxColor.CYAN, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		msTimeTxt.scrollFactor.set();
+		msTimeTxt.alpha = 0;
+		msTimeTxt.visible = true;
+		msTimeTxt.borderSize = 2;
+		uiGroup.add(msTimeTxt);
 
 		botplayTxt = new FlxText(850, timeBar.y + 670, FlxG.width - 800, "Botplay is enabled, Score won't be saved.", 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
 		uiGroup.add(botplayTxt);
-		if(ClientPrefs.data.downScroll)
-			botplayTxt.y = timeBar.y - 78;
 			
 		chartingTxt = new FlxText(400, timeBar.y + 580, FlxG.width - 800, "Player is in Charting Mode, Score won't be saved.", 32);
 		chartingTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -1180,6 +1194,17 @@ class PlayState extends MusicBeatState
 			callOnScripts('onCountdownStarted', null);
 
 			var swagCounter:Int = 0;
+			
+			if (ClientPrefs.data.showMsText) {
+				if (ClientPrefs.data.downScroll) {
+					msTimeTxt.x = playerStrums.members[1].x-100;
+					msTimeTxt.y = playerStrums.members[1].y+100;
+				} else {
+					msTimeTxt.x = playerStrums.members[0].x-250;
+					msTimeTxt.y = playerStrums.members[1].y+30;
+				}
+			}
+			
 			if (startOnTime > 0) {
 				clearNotesBefore(startOnTime);
 				setSongTime(startOnTime - 350);
@@ -1372,10 +1397,11 @@ class PlayState extends MusicBeatState
 		{
 			scoreTxt.text = 'Score: ${songScore} | Misses: ${songMisses} | Accuracy: ${accPercent} | ' + ratingName + suffix + ' (${ratingFC})';
 		}
+		
+		judgementTween();
 
 		if (!miss)
 			doScoreBop();
-			judgementTween();
 
 		callOnScripts('onUpdateScore', [miss]);
 	}
@@ -1412,7 +1438,7 @@ class PlayState extends MusicBeatState
 			gfSpeed, {onComplete: _ -> timeTxtTween = null});
     }
 		
-	public function judgementTween() {
+	public function judgementTween():Void {
 		if (judgementCounter == null || !ClientPrefs.data.scoreZoom) 
 			return;
 	
@@ -1887,12 +1913,13 @@ class PlayState extends MusicBeatState
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
 		
-		sicks = ratingsData[0].hits;
-		goods = ratingsData[1].hits;
-		bads = ratingsData[2].hits;
-		shits = ratingsData[3].hits;
+		perfects = ratingsData[0].hits;			
+		sicks = ratingsData[1].hits;
+		goods = ratingsData[2].hits;
+		bads = ratingsData[3].hits;
+		shits = ratingsData[4].hits;
 		
-		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')';
+		judgementCounter.text = 'NPS: ${notesPerSecond} (Max: ${maxNps})\nPerfects: ${perfects}\nSicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nAverage: ' + Math.round(averageMs) + 'ms\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')';
 		
 		var balls = npsArray.length - 1;
 		while (balls >= 0)
@@ -2772,6 +2799,19 @@ class PlayState extends MusicBeatState
 	private function popUpScore(note:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset);
+		allNotesMs += noteDiff;
+		averageMs = allNotesMs/songHits;
+		if (ClientPrefs.data.showMsText) {
+			msTimeTxt.alpha = 1;
+			msTimeTxt.text =Std.string(Math.round(noteDiff)) + "ms";
+			if (msTimeTxtTween != null){
+				msTimeTxtTween.cancel(); msTimeTxtTween.destroy(); // top 10 awesome code
+			}
+			msTimeTxtTween = FlxTween.tween(msTimeTxt, {alpha: 0}, 0.25, {
+				onComplete: function(tw:FlxTween) {msTimeTxtTween = null;}, startDelay: 0.7
+			});
+		}
+		
 		vocals.volume = 1;
 
 		if (!ClientPrefs.data.comboStacking && comboGroup.members.length > 0) {
@@ -3258,9 +3298,7 @@ class PlayState extends MusicBeatState
 		if(note.wasGoodHit) return;
 		if(cpuControlled && (note.ignoreNote || note.hitCausesMiss)) return;
 		
-		if (ClientPrefs.data.scoreType == 'Kade') {
-			if (!note.isSustainNote) npsArray.unshift(Date.now());
-		}
+		if (!note.isSustainNote) npsArray.unshift(Date.now());
 
 		note.wasGoodHit = true;
 		if (ClientPrefs.data.hitsoundVolume > 0 && !note.hitsoundDisabled)
@@ -3802,10 +3840,11 @@ class PlayState extends MusicBeatState
 
 	function fullComboUpdate()
 	{	
-		sicks = ratingsData[0].hits;
-		goods = ratingsData[1].hits;
-		bads = ratingsData[2].hits;
-		shits = ratingsData[3].hits;
+		perfects = ratingsData[0].hits;			
+		sicks = ratingsData[1].hits;
+		goods = ratingsData[2].hits;
+		bads = ratingsData[3].hits;
+		shits = ratingsData[4].hits;
 	
 		ratingFC = '#Clear#';
 		if(songMisses < 1)
@@ -3813,12 +3852,12 @@ class PlayState extends MusicBeatState
 			if (bads > 0 || shits > 0) ratingFC = "$FC$";
 			else if (goods > 0) ratingFC = '^GFC^';
 			else if (sicks > 0) ratingFC = '_SFC_';
-			//else if (perfects > 0) ratingFC = '!MFC!';
+			else if (perfects > 0) ratingFC = '!MFC!';
 		}
 		else if (songMisses < 10)
 			ratingFC = '&SDCB&';
 			
-		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')';
+		judgementCounter.text = 'NPS: ${notesPerSecond} (Max: ${maxNps})\nPerfects: ${perfects}\nSicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nAverage: ' + Math.round(averageMs) + 'ms\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')';
 		updateScoreTxt();
 	}
 	
@@ -3971,7 +4010,7 @@ class PlayState extends MusicBeatState
 			]);
 		}
 			
-		judgementCounter.applyMarkup('Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')',
+		judgementCounter.applyMarkup('NPS: ${notesPerSecond} (Max: ${maxNps})\nPerfects: ${perfects}\nSicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nAverage: ' + Math.round(averageMs) + 'ms\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')',
 			[
 				new FlxTextFormatMarkerPair(redFormat, '*'),
 				new FlxTextFormatMarkerPair(orangeFormat, '@'),

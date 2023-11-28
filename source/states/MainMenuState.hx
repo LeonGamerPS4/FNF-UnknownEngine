@@ -25,7 +25,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var funkinReduxVersion:String = '2.5 PRE 3'; // Used for OutdatedState and PlayState
+	public static var funkinReduxVersion:String = '2.5 PRE 4'; // Used for OutdatedState and PlayState
 	public static var micdUpVersion:String = '2.0.3';
 	public static var psychEngineVersion:String = '0.7.2';
 	

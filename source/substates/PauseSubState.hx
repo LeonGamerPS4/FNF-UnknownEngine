@@ -8,6 +8,9 @@ import backend.Song;
 
 import flixel.addons.transition.FlxTransitionableState;
 
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
+
 import flixel.util.FlxStringUtil;
 
 import states.StoryMenuState;
@@ -79,6 +82,13 @@ class PauseSubState extends MusicBeatSubstate
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
+		
+		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFFFFF, 0x0));
+		grid.velocity.set(40, 40);
+		grid.alpha = 0;
+		FlxTween.tween(grid, {alpha: 0.3}, 0.5, {ease: FlxEase.quadOut});
+		add(grid);
+		grid.scrollFactor.set(0, 0.07);
 
 		var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.SONG.song, 32);
 		levelInfo.scrollFactor.set();
@@ -471,8 +481,9 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		for (i in 0...menuItems.length) {
-			var item = new Alphabet(90, 320, menuItems[i], true);
-			item.isMenuItem = true;
+			var item = new Alphabet(0, FlxG.width/5 + (70 * i + 30), menuItems[i], true);
+			item.x += 30;
+			item.altRotation = true;
 			item.targetY = i;
 			grpMenuShit.add(item);
 

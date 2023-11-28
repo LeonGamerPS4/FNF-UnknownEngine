@@ -14,6 +14,11 @@ class Highscore
 		setRating(daSong, 0);
 		setRank(daSong, 0);
 	}
+	
+	public static function resetRank(song:String, diff:Int = 0):Void
+	{
+		substates.RankingSubstate.ranking = "NA";
+	}
 
 	public static function resetWeek(week:String, diff:Int = 0):Void
 	{

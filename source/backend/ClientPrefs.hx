@@ -11,6 +11,8 @@ class SaveVariables {
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
+	public var judgementCounter:Bool = true;
+	public var showMsText:Bool = true;
 	public var ratingSystem:String = 'Default';
 	public var showFPS:Bool = true;
 	public var flashing:Bool = true;
@@ -77,6 +79,7 @@ class SaveVariables {
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
 	public var ratingOffset:Int = 0;
+	public var perfectWindow:Int = 20;
 	public var sickWindow:Int = 45;
 	public var goodWindow:Int = 90;
 	public var badWindow:Int = 135;

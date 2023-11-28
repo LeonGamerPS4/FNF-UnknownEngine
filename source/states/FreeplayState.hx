@@ -20,6 +20,7 @@ import flixel.addons.display.FlxGridOverlay;
 class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
+	var lerpList:Array<Bool> = [];
 
 	var selector:FlxText;
 	var selectedSomethin:Bool = false;
@@ -45,7 +46,7 @@ class FreeplayState extends MusicBeatState
 	var playbackSymbols:Array<FlxText> = [];
 	var playbackTxt:FlxText;
 
-	var theicon:HealthIcon;
+	var icon:HealthIcon;
 
 	var curTime:Float;
 
@@ -143,22 +144,25 @@ class FreeplayState extends MusicBeatState
 
 		for (i in 0...songs.length)
 		{
-			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
+			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, true);
 			songText.targetY = i;
+			lerpList.push(true);
 			grpSongs.add(songText);
 
 			Mods.currentModDirectory = songs[i].folder;
-			theicon = new HealthIcon(songs[i].songCharacter);
-			theicon.sprTracker = songText;
+			icon = new HealthIcon(songs[i].songCharacter);
+			//icon.bopMult = 0.95;
+			icon.sprTracker = songText;
 			
 			// too laggy with a lot of songs, so i had to recode the logic for it
 			songText.visible = songText.active = songText.isMenuItem = false;
-			theicon.visible = theicon.active = false;
+			icon.visible = icon.active = false;
 
 			// using a FlxGroup is too much fuss!
-			iconArray.push(theicon);
-			add(theicon);
-			theicon.alpha = 1;
+			iconArray.push(icon);
+			add(icon);
+			//icon.copyState = true;
+			icon.alpha = 1;
 
 			// songText.x += 40;
 			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
@@ -273,7 +277,7 @@ class FreeplayState extends MusicBeatState
 		#end
 		
 		switchPlayMusic();
-		updateTexts();
+		//updateTexts();
 		super.create();
 		
 		new FlxTimer().start(0.5, function(tmr:FlxTimer)
@@ -327,6 +331,37 @@ class FreeplayState extends MusicBeatState
 		
 		while(ratingSplit[1].length < 2) { //Less than 2 decimals in it, add decimals then
 			ratingSplit[1] += '0';
+		}
+		
+		final lerpVal:Float = CoolUtil.clamp(elapsed * 9.6, 0, 1);
+		for (i=>song in grpSongs.members) {
+			@:privateAccess {
+				if (lerpList[i]) {
+					song.y = FlxMath.lerp(song.y, (song.scaledY * song.yMult) + (FlxG.height * 0.48) + song.yAdd, lerpVal);
+					if(song.forceX != Math.NEGATIVE_INFINITY) {
+						song.x = song.forceX;
+					} else {
+						switch (song.targetY) {
+							case 0:
+								song.x = FlxMath.lerp(song.x, (song.targetY * 20) + 90 + song.xAdd, lerpVal);
+							default:
+								song.x = FlxMath.lerp(song.x, (song.targetY * (song.targetY < 0 ? 20 : -20)) + 90 + song.xAdd, lerpVal);
+						}
+					}
+				} else {
+					song.y = ((song.scaledY * song.yMult) + (FlxG.height * 0.48) + song.yAdd);
+					if(song.forceX != Math.NEGATIVE_INFINITY) {
+						song.x = song.forceX;
+					} else {
+						switch (song.targetY) {
+							case 0:
+								song.x = ((song.targetY * 20) + 90 + song.xAdd);
+							default:
+								song.x = ((song.targetY * (song.targetY < 0 ? 20 : -20)) + 90 + song.xAdd);
+						}
+					}
+				}
+			}
 		}
 
 		var shiftMult:Int = 1;
@@ -660,7 +695,7 @@ class FreeplayState extends MusicBeatState
 				missingTextBG.visible = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 
-				updateTexts(elapsed);
+				//updateTexts(elapsed);
 				super.update(elapsed);
 				return;
 			}
@@ -713,16 +748,22 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
 
-		updateTexts(elapsed);
+		//updateTexts(elapsed);
 		super.update(elapsed);
 	}
 	
+	/*
 	override function beatHit() {
 		super.beatHit();
 
-		if (playingMusic)
-			iconArray[instPlaying].bounce();
+		for (i in 0...iconArray.length)
+		{
+			if (iconArray[i].isOnScreen() && iconArray[i] != null) {
+				iconArray[i].bop({curBeat: curBeat}, "Bop");
+			}
+		}
 	}
+	*/
 
 	public static function destroyFreeplayVocals() {
 		if(vocals != null) {
@@ -847,17 +888,26 @@ class FreeplayState extends MusicBeatState
 
 		for (i in 0...iconArray.length)
 		{
+			iconArray[i].visible = true;
+			iconArray[i].active = true;
 			iconArray[i].alpha = 0.6;
+			iconArray[i].animation.curAnim.curFrame = 0;
 		}
 
 		iconArray[curSelected].alpha = 1;
 
-		for (item in grpSongs.members)
+		for (i=>item in grpSongs.members)
 		{
+			item.active = item.visible = lerpList[i] = true;
+			item.targetY = bullShit - curSelected;
 			bullShit++;
+
 			item.alpha = 0.6;
-			if (item.targetY == curSelected)
+
+			if (item.targetY == 0)
+			{
 				item.alpha = 1;
+			}
 		}
 		
 		Mods.currentModDirectory = songs[curSelected].folder;
@@ -948,7 +998,7 @@ class FreeplayState extends MusicBeatState
 			playbackBG.visible = true;
 			#end
 
-			bottomText.text = "Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song";
+			bottomText.text = "Press SPACE to Pause the Song. / Press ESCAPE to Exit the Music Player. / Press R to Reset the Song.";
 			positionSong();
 			
 			progressBar.setRange(0, FlxG.sound.music.length);
@@ -1023,6 +1073,7 @@ class FreeplayState extends MusicBeatState
 	}
 	#end
 
+	/*
 	var _drawDistance:Int = 4;
 	var _lastVisibles:Array<Int> = [];
 	public function updateTexts(elapsed:Float = 0.0)
@@ -1049,6 +1100,7 @@ class FreeplayState extends MusicBeatState
 			_lastVisibles.push(i);
 		}
 	}
+	*/
 	
 	override function destroy():Void
 	{

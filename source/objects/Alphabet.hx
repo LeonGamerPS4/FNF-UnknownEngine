@@ -16,12 +16,23 @@ class Alphabet extends FlxSpriteGroup
 	public var bold:Bool = false;
 	public var letters:Array<AlphaCharacter> = [];
 
+	public var forceX:Float = Math.NEGATIVE_INFINITY;
+	public var targetY(default, set):Float = 0;
+	function set_targetY(newY:Float) {
+		targetY = newY;
+
+		scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
+		return targetY;
+	}
+	public var yMult:Float = 120;
+	public var xAdd:Float = 0;
+	public var yAdd:Float = 0;
 	public var isMenuItem:Bool = false;
-	public var targetY:Int = 0;
-	public var targetX:Float = 0;
+	public var altRotation:Bool = false;
+	public var align:String = '';
+	public var alignAdd:Float = 0;
 	public var changeX:Bool = true;
 	public var changeY:Bool = true;
-	public var itemType:String = "";
 
 	public var alignment(default, set):Alignment = LEFT;
 	public var scaleX(default, set):Float = 1;
@@ -34,6 +45,7 @@ class Alphabet extends FlxSpriteGroup
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = true)
 	{
 		super(x, y);
+		forceX = Math.NEGATIVE_INFINITY;
 
 		this.startPosition.x = x;
 		this.startPosition.y = y;
@@ -163,50 +175,55 @@ class Alphabet extends FlxSpriteGroup
 		}
 	}
 
+	var scaledY:Float = 0;
 	override function update(elapsed:Float)
 	{
-		var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
-
+		super.update(elapsed);
+		
+		final lerpVal:Float = FlxMath.bound(elapsed * 9.6, 0, 1);
+		
 		if (isMenuItem)
 		{
-			var lerpVal:Float = FlxMath.bound(elapsed * 9.6, 0, 1);
 			if(changeX)
 				x = FlxMath.lerp(x, (targetY * distancePerItem.x) + startPosition.x, lerpVal);
 			if(changeY)
 				y = FlxMath.lerp(y, (targetY * 1.3 * distancePerItem.y) + startPosition.y, lerpVal);
 		}
-
-		switch (itemType)
-		{
-			case "Classic":
-				y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.16/(ClientPrefs.data.framerate/60));
-				x = FlxMath.lerp(x, (targetY * 20) + 90, 0.16/(ClientPrefs.data.framerate/60));
-
-			case "Vertical":
-				y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.5), 0.16/(ClientPrefs.data.framerate/60));
-				x = FlxMath.lerp(x, (targetY * 0) + 308, 0.16/(ClientPrefs.data.framerate/60));
-				x += targetX/(ClientPrefs.data.framerate/60);
-			
-			case "C-Shape":
-				y = FlxMath.lerp(y, (scaledY * 65) + (FlxG.height * 0.39), 0.16/(ClientPrefs.data.framerate/60));
-
-				x = FlxMath.lerp(x, Math.exp(scaledY * 0.8) * 70 + (FlxG.width * 0.1), 0.16/(ClientPrefs.data.framerate/60));
-				if (scaledY < 0)
-					x = FlxMath.lerp(x, Math.exp(scaledY * -0.8) * 70 + (FlxG.width * 0.1), 0.16/(ClientPrefs.data.framerate/60));
-
-				if (x > FlxG.width + 30)
-					x = FlxG.width + 30;
-			case "D-Shape":
-				y = FlxMath.lerp(y, (scaledY * 90) + (FlxG.height * 0.45), 0.16/(ClientPrefs.data.framerate/60));
-	
-				x = FlxMath.lerp(x, Math.exp(scaledY * 0.8) * -70 + (FlxG.width * 0.35), 0.16/(ClientPrefs.data.framerate/60));
-				if (scaledY < 0)
-					x = FlxMath.lerp(x, Math.exp(scaledY * -0.8) * -70 + (FlxG.width * 0.35), 0.16/(ClientPrefs.data.framerate/60));
-	
-				if (x < -900)
-					x = -900;
+		
+		if (altRotation) {
+			y = FlxMath.lerp(y, (scaledY * yMult) + (FlxG.height * 0.48) + yAdd, lerpVal);
+			if(forceX != Math.NEGATIVE_INFINITY) {
+				x = forceX;
+			} else {
+				switch (targetY) {
+					case 0:
+						x = FlxMath.lerp(x, (targetY * 20) + 90 + xAdd, lerpVal);
+					default:
+						x = FlxMath.lerp(x, (targetY * (targetY < 0 ? 20 : -20)) + 90 + xAdd, lerpVal);
+				}
+			}
+			return;
 		}
-		super.update(elapsed);
+		
+		if (!altRotation && !isMenuItem && align.length > 0) {
+			y = FlxMath.lerp(y, (scaledY * yMult) + (FlxG.height * 0.48) + yAdd, lerpVal);
+			if(forceX != Math.NEGATIVE_INFINITY) {
+				x = forceX;
+			} else {
+				switch (align.toLowerCase()) {
+					case 'left':
+						x = FlxMath.lerp(x, (bold ? 30 : 15) + alignAdd, lerpVal);
+					case 'right':
+						x = FlxMath.lerp(x, (FlxG.width - width) - (bold ? 30 : 15) + alignAdd, lerpVal);
+					case 'center':
+						x = FlxMath.lerp(x, (FlxG.width/2) - width/2, lerpVal);
+					case 'none':
+						//do nothing
+					default:
+						x = FlxMath.lerp(x, (targetY * 20) + 90 + xAdd, lerpVal);
+				}
+			}
+		}
 	}
 
 	public function snapToPosition()

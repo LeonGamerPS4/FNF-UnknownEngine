@@ -25,7 +25,7 @@ class MusicBeatState extends FlxUIState
 	}
 	
 	public static var windowNameSuffix:String = "";
-	public static var windowNamePrefix:String = "Friday Night Funkin' REDUX 2.5";
+	public static var windowNamePrefix:String = "Friday Night Funkin' Unknown Engine 2.5";
 
 	public static var camBeat:FlxCamera;
 

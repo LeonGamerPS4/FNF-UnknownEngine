@@ -97,7 +97,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What should the Score Bar display as?",
 			'scoreType',
 			'string',
-			['REDUX', 'Psych', 'Kade', 'FPS+', 'YoshiCrafter', 'Disabled']);
+			['Unknown', 'Psych', 'Kade', 'FPS+', 'YoshiCrafter', 'Disabled']);
 		addOption(option);
 		
 		/*
@@ -145,7 +145,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What colors should the Time Bar display?",
 			'timeBarColor',
 			'string',
-			['REDUX', 'REDUX Classic', 'Psych', 'Kade']);
+			['Unknown', 'Unknown Classic', 'Psych', 'Kade']);
 		addOption(option);
 
 		var option:Option = new Option('Health Bar Opacity',

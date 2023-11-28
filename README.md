@@ -1,4 +1,4 @@
-# Friday Night Funkin' REDUX (Unknown Engine) (WIP)
+# Friday Night Funkin' Unknown Engine 2.5 (WIP)
 
 ## THIS FORK IS STILL IN ALPHA, I CANNOT GUARANTEE THAT BUILDS WILL BE COMPLETELY STABLE
 

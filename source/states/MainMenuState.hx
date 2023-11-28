@@ -25,7 +25,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var funkinReduxVersion:String = '2.5 PRE 4'; // Used for OutdatedState and PlayState
+	public static var unknownEngineVersion:String = '2.5 PRE 4'; // Used for OutdatedState and PlayState
 	public static var micdUpVersion:String = '2.0.3';
 	public static var psychEngineVersion:String = '0.7.2';
 	
@@ -189,7 +189,7 @@ class MainMenuState extends MusicBeatState
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 1250, "FNF Redux v" + Application.current.meta.get('version') + " \\ Friday Night Funkin' v0.2.8", 12);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 1250, "Unknown Engine v" + Application.current.meta.get('version') + " \\ Friday Night Funkin' v0.2.8", 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);

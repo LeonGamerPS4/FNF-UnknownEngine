@@ -105,12 +105,12 @@ class TitleState extends MusicBeatState
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.data.checkForUpdates && !closedState) {
 			trace('checking for update');
-			var http = new haxe.Http("https://raw.githubusercontent.com/LeonGamerPS4/FNF-Redux/main/gitVersion.txt");
+			var http = new haxe.Http("https://raw.githubusercontent.com/LeonGamerPS4/FNF-UnknownEngine/main/gitVersion.txt");
 
 			http.onData = function (data:String)
 			{
 				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.funkinReduxVersion.trim();
+				var curVersion:String = MainMenuState.unknownEngineVersion.trim();
 				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
 					trace('versions arent matching!');
@@ -677,7 +677,7 @@ class TitleState extends MusicBeatState
 					isPlaying = true;
 				case 2:
 					#if PSYCH_WATERMARKS
-					createCoolText(['FNF Redux by'], 40);
+					createCoolText(['Unknown Engine by'], 40);
 					#else
 					createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
 					#end
@@ -693,7 +693,7 @@ class TitleState extends MusicBeatState
 					deleteCoolText();
 				case 6:
 					#if PSYCH_WATERMARKS
-					createCoolText(['A stupid fork', 'of'], -40);
+					createCoolText(['This is a stupid fork', 'of'], -40);
 					#else
 					createCoolText(['In association', 'with'], -40);
 					#end

@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin' REDUX 2.5" file="Redux" packageName="com.leongamer.fnfredux" package="com.leongamer.fnfredux" main="Main" version="2.5" company="LeonGamer" />
+	<app title="Friday Night Funkin' Unknown Engine 2.5" file="UnknownEngine" packageName="com.leongamer.unknownengine" package="com.leongamer.unknownengine" main="Main" version="2.5" company="LeonGamer" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />

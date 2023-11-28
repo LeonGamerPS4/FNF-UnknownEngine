@@ -69,7 +69,7 @@ class FramerateCounter extends TextField
 	public dynamic function updateText():Void { // so people can override it in hscript
 		text = 'FPS: ${currentFPS}'
 		+ '\nRAM: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}'
-		+ '\nREDUX v' + states.MainMenuState.funkinReduxVersion;
+		+ '\nUnknown Engine v' + states.MainMenuState.unknownEngineVersion;
 
 		textColor = 0xFFFFFFFF;
 		if (ClientPrefs.data.colorblindMode == "Invert")

@@ -713,8 +713,8 @@ class PlayState extends MusicBeatState
 		uiGroup.add(judgementCounter);
 		
 		versionTxt = new FlxText(0, FlxG.height - 18, 0, SONG.song + " - " +
-			backend.Difficulty.getString() + " | FNF Redux v" +
-		states.MainMenuState.funkinReduxVersion, 16);
+			backend.Difficulty.getString() + " | UE " +
+		states.MainMenuState.unknownEngineVersion, 16);
 		versionTxt.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionTxt.scrollFactor.set();
 		uiGroup.add(versionTxt);
@@ -732,6 +732,9 @@ class PlayState extends MusicBeatState
 		botplayTxt.scrollFactor.set();
 		botplayTxt.visible = cpuControlled;
 		uiGroup.add(botplayTxt);
+		if(ClientPrefs.data.downScroll) {
+			botplayTxt.y = timeBar.y - 675;
+		}
 			
 		chartingTxt = new FlxText(400, timeBar.y + 580, FlxG.width - 800, "Player is in Charting Mode, Score won't be saved.", 32);
 		chartingTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -919,10 +922,10 @@ class PlayState extends MusicBeatState
 	}
 	
 	public function reloadTimeBarColors() {
-		if (ClientPrefs.data.timeBarColor == 'REDUX') {
+		if (ClientPrefs.data.timeBarColor == 'Unknown') {
 			timeBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), 
 				0xFF696969);
-		} else if (ClientPrefs.data.timeBarColor == 'REDUX Classic') {
+		} else if (ClientPrefs.data.timeBarColor == 'Unknown Classic') {
 			timeBar.setColors(0xFF73FF91, 0xFF8C8C8C);
 		} else if (ClientPrefs.data.timeBarColor == 'Psych') {
 			timeBar.setColors(0xFFFFFFFF, 0xFF000000);
@@ -3152,7 +3155,7 @@ class PlayState extends MusicBeatState
 		});
 		
 		if (daNote.hitCausesMiss) {
-			thScore += 350;
+			thScore += 600;
 			songMisses++;
 		}
 		
@@ -3329,7 +3332,7 @@ class PlayState extends MusicBeatState
 		{
 			combo++;
 			if(combo > 9999) combo = 9999;
-			thScore += 350;
+			thScore += 600;
 			popUpScore(note);
 		}
 		var gainHealth:Bool = true; // prevent health gain, as sustains are threated as a singular note
@@ -3852,7 +3855,7 @@ class PlayState extends MusicBeatState
 			if (bads > 0 || shits > 0) ratingFC = "$FC$";
 			else if (goods > 0) ratingFC = '^GFC^';
 			else if (sicks > 0) ratingFC = '_SFC_';
-			else if (perfects > 0) ratingFC = '!MFC!';
+			else if (perfects > 0) ratingFC = '*MFC*';
 		}
 		else if (songMisses < 10)
 			ratingFC = '&SDCB&';
@@ -3950,7 +3953,7 @@ class PlayState extends MusicBeatState
 		
 		healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
 
-		if (ClientPrefs.data.scoreType == 'REDUX') {
+		if (ClientPrefs.data.scoreType == 'Unknown') {
 		scoreTxt.applyMarkup('Score: ${songScore} (${thScore})' + (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") + (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") + healthTxt 
 			+ ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : ""),
 			[

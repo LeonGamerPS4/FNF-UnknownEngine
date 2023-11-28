@@ -117,7 +117,7 @@ class DiscordClient
 		_options.details = details;
 		_options.state = state;
 		_options.largeImageKey = 'icon';
-		_options.largeImageText = "Mod Version: " + states.MainMenuState.funkinReduxVersion;
+		_options.largeImageText = "Mod Version: " + states.MainMenuState.unknownEngineVersion;
 		_options.smallImageKey = smallImageKey;
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		_options.startTimestamp = Std.int(startTimestamp / 1000);

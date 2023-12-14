@@ -50,7 +50,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		gradientBar.y = FlxG.height - gradientBar.height;
 		gradientBar.scrollFactor.set(0, 0);
 		
-		grid.velocity.set(40, 40);
+		grid.velocity.set(21, 51);
 		grid.alpha = 0;
 		grid.scrollFactor.set(0, 0.07);
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});		

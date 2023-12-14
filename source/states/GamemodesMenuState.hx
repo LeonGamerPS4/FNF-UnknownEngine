@@ -1,24 +1,22 @@
 package states;
 
-#if desktop
-import sys.io.File;
-import sys.FileSystem;
-#end
+import flixel.FlxObject;
+
 import backend.Discord.DiscordClient;
+
 import flixel.util.FlxTimer;
 import flixel.util.FlxGradient;
-import flixel.FlxG;
-import flixel.FlxObject;
-import flixel.FlxSprite;
+
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
+
 import flixel.group.FlxGroup.FlxTypedGroup;
+
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.math.FlxMath;
 
-import states.editors.MasterEditorMenu;
+import flixel.math.FlxMath;
 
 using StringTools;
 
@@ -31,9 +29,9 @@ class GamemodesMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'week', 
 		'freeplay',
-		//'marathon', 
-		//'endless', 
-		//'survival', 
+		'marathon', 
+		'endless', 
+		'survival', 
 		'modifier'];
 	var camFollow:FlxObject;
 
@@ -49,7 +47,7 @@ class GamemodesMenuState extends MusicBeatState
 	{
 		#if desktop
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence("Gamemode Menu", null);
 		#end
 		
 		transIn = FlxTransitionableState.defaultTransIn;
@@ -57,8 +55,13 @@ class GamemodesMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 		
-		if (!TitleState.isPlaying)
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		if(FlxG.sound.music != null || !TitleState.isPlaying)
+			if (!FlxG.sound.music.playing || !TitleState.isPlaying)
+			{	
+				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+				FlxG.sound.music.time = 9400;
+				FlxTween.tween(FlxG.sound.music, {volume: 0.7}, 0.4);
+			}
 
 		bg.scrollFactor.x = 0;
 		bg.scrollFactor.y = 0.03;
@@ -69,7 +72,7 @@ class GamemodesMenuState extends MusicBeatState
 		bg.y -= bg.height;
 		add(bg);
 		
-		grid.velocity.set(40, 40);
+		grid.velocity.set(0.3, 20);
 		grid.alpha = 0;
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
@@ -211,7 +214,7 @@ class GamemodesMenuState extends MusicBeatState
 				
 				TitleState.isPlaying = true;
 
-				DiscordClient.changePresence("Back to the Main Menu",  null);
+				DiscordClient.changePresence("In the Menus",  null);
 
 				FlxTween.tween(FlxG.camera, { zoom: 2}, 0.4, { ease: FlxEase.expoIn});
 				FlxTween.tween(bg, { y: 0-bg.height}, 0.4, { ease: FlxEase.expoIn });
@@ -255,22 +258,24 @@ class GamemodesMenuState extends MusicBeatState
 									DiscordClient.changePresence("Freeplay Menu",  null);	
 									TitleState.isPlaying = true;
 								case 'modifier':
-									FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
 									MusicBeatState.switchState(new ModifiersState());
 									ModifiersState.fromFreeplay = false;
 									ModifiersState.fromCampaign = false;
 									DiscordClient.changePresence("Modifier Menu",  null);
-								/*											
+									FlxG.sound.music.stop();
+                                    FlxG.sound.music == null;										
 								case 'marathon':
-									FlxG.switchState(new MenuMarathon());
-									DiscordClient.changePresence("I wanna make a marathon",  null);
+									FlxG.switchState(new /*MenuMarathon*/GamemodesMenuState());
+									DiscordClient.changePresence("Marathon Menu",  null);
+									TitleState.isPlaying = true;
 								case 'survival':
-									FlxG.switchState(new MenuSurvival());
-									DiscordClient.changePresence("This feels like TDI already",  null);
-								*/									
+									FlxG.switchState(new /*MenuSurvival*/GamemodesMenuState());
+									DiscordClient.changePresence("Survival Menu",  null);
+									TitleState.isPlaying = true;								
 								case 'endless':
 									MusicBeatState.switchState(new EndlessState());
-									DiscordClient.changePresence("Endless easy SMM2 moment",  null);
+									DiscordClient.changePresence("Endless Menu",  null);
+									TitleState.isPlaying = true;
 							}
 						});
 				});

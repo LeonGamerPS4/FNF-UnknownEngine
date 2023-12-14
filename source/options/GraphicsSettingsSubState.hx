@@ -93,6 +93,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	override function changeSelection(change:Int = 0)
 	{
 		super.changeSelection(change);
-		//boyfriend.visible = (antialiasingOption == curSelected);
+		boyfriend.visible = (antialiasingOption == curSelected);
 	}
 }

@@ -92,7 +92,7 @@ class StoryMenuState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence("Campaign Menu", null);
 		#end
 
 		var num:Int = 0;
@@ -184,6 +184,8 @@ class StoryMenuState extends MusicBeatState
 		add(txtWeekTitle);
 		
 		add(blankBG);
+		
+		MusicBeatState.windowNameSuffix = " - Campaign Menu";
 
 		changeWeek();
 		changeDifficulty();

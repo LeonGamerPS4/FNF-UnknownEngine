@@ -100,14 +100,40 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Unknown', 'Psych', 'Kade', 'FPS+', 'YoshiCrafter', 'Disabled']);
 		addOption(option);
 		
-		/*
-		var option:Option = new Option('Icon Bop:',
-			"Select an icon bop type.",
+		var option:Option = new Option('Character Icons',
+			'If unchecked, hides character icons.',
+			'charIcons',
+			'bool');
+		addOption(option);
+		
+		var option:Option = new Option('Icon Bop Zooming',
+			'How zoomed in should character icons be after a beat.',
+			'iconZoom',
+			'float');
+		option.scrollSpeed = 1;
+		option.minValue = 1;
+		option.maxValue = 2;
+		option.changeValue = 0.01;
+		option.decimals = 2;
+		addOption(option);
+		
+		var option:Option = new Option('Icon Bop Anim: ',
+			"How should icon bopping be animated?",
 			'iconBop',
 			'string',
-			['Bop', 'Slide (Horizontal)', 'Slide (Vertical)', 'Disabled']);
+			['Bop 1', 'Bop 2', 'Individual Bop']);
 		addOption(option);
-		*/
+		
+		var option:Option = new Option('Lane Underlay Opacity',
+			'How opaque should be a black underlay for note lanes.',
+			'laneUnderlayOpacity',
+			'percent');
+		option.scrollSpeed = 1.6;
+		option.minValue = 0.0;
+		option.maxValue = 1;
+		option.changeValue = 0.1;
+		option.decimals = 1;
+		addOption(option);
 
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",
@@ -135,6 +161,12 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 		
+		var option:Option = new Option('Smooth Health Movement',
+			"If checked, your health will move more smoothly when it increases/decreases.",
+			'smoothHealth',
+			'bool');
+		addOption(option);
+		
 		var option:Option = new Option('Icon Colored Health Bar',
 			"If unchecked, the health bar will have set colors\nrather than colors based on the icons.",
 			'coloredHealthBar',
@@ -157,6 +189,12 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.maxValue = 1;
 		option.changeValue = 0.1;
 		option.decimals = 1;
+		addOption(option);
+		
+		var option:Option = new Option('Striped Health Bar',
+			'If checked, the health bar shows a striped overlay on it.',
+			'stripedBar',
+			'bool');
 		addOption(option);
 		
 		#if !mobile
@@ -252,7 +290,6 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
 		super.destroy();
 	}
 

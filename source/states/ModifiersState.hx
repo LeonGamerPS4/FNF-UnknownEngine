@@ -91,9 +91,9 @@ class ModifiersState extends MusicBeatState
 
 	private var bg:FlxSprite;
 	
-	public function new()
+	override function create()
 	{
-		super();
+		super.create();
 		
 		menuMusic = new FlxSound();
 		menuMusic.loadEmbedded(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), true, true);
@@ -104,6 +104,12 @@ class ModifiersState extends MusicBeatState
 		
 		bg = new FlxSprite(0, 0).loadGraphic(Paths.image('modiBG_Main'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
+		bg.scrollFactor.x = 0;
+		bg.scrollFactor.y = 0.03;
+		bg.setGraphicSize(Std.int(bg.width * 1.1));
+		bg.updateHitbox();
+		bg.screenCenter();
+		bg.alpha = 0;
 		add(bg);
 		
 		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x5585BDFF, 0xAAECE2FF], 1, 90, true); 
@@ -113,8 +119,8 @@ class ModifiersState extends MusicBeatState
 
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
+		grid.scrollFactor.set(0.07, 0.07);
 
 		side.scrollFactor.x = 0;
 		side.scrollFactor.y = 0;
@@ -134,13 +140,14 @@ class ModifiersState extends MusicBeatState
 		add(checkboxGroup);
 		
 		descBox = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		descBox.alpha = 0.6;
+		descBox.alpha = 0;
 		add(descBox);
 
 		descText = new FlxText(50, 600, 1180, "", 32);
 		descText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		descText.scrollFactor.set();
 		descText.borderSize = 2.4;
+		descText.alpha = 0;
 		add(descText);
 		
 		getOptions();
@@ -178,17 +185,35 @@ class ModifiersState extends MusicBeatState
 		changeSelection();
 		reloadCheckboxes();
 		
-		if(ClientPrefs.data.pauseMusic != 'None')
+		if (!FlxG.sound.music.playing && !isPlayState && ClientPrefs.data.pauseMusic != 'None')
 		{
 			FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), menuMusic.volume);
 			FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
-			FlxG.sound.music.time = menuMusic.time;
 		}
+		else if (!FlxG.sound.music.playing && !isPlayState && ClientPrefs.data.pauseMusic == 'None')
+		{
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		}
+		
+		FlxTween.tween(bg, { alpha:1}, 0.8, { ease: FlxEase.quartInOut});
+		FlxTween.tween(grid, { alpha:0.6}, 0.8, { ease: FlxEase.quartInOut});
+		FlxTween.tween(descBox, { alpha:0.6}, 0.8, { ease: FlxEase.quartInOut});
+		FlxTween.tween(descText, { alpha:1}, 0.8, { ease: FlxEase.quartInOut});
+		FlxG.camera.zoom = 0.6;
+		FlxG.camera.alpha = 0;
+		FlxTween.tween(FlxG.camera, { zoom:1, alpha:1}, 0.7, { ease: FlxEase.quartInOut});
+		
+		MusicBeatState.windowNameSuffix = " - Modifier Menu";
+		
+		resetted = false;
 	}
 
 	var nextAccept:Int = 5;
 	var holdTime:Float = 0;
 	var holdValue:Float = 0;
+	
+	public static var resetted:Bool = false;
+	
 	override function update(elapsed:Float)
 	{	
 		if (goption.getValue() != "constant")
@@ -216,9 +241,24 @@ class ModifiersState extends MusicBeatState
 		{
 			changeSelection(-FlxG.mouse.wheel);
 		}
+		
+		if (FlxG.keys.justPressed.CONTROL)
+		{
+			FlxG.sound.play(Paths.sound('confirmMenu'));
+			openSubState(new substates.PresetSubstate());
+		}
 
 		if (controls.BACK) {
 			ClientPrefs.saveSettings();
+			
+			FlxTween.tween(FlxG.camera, { zoom:0.6, alpha:-0.6}, 0.8, { ease: FlxEase.quartInOut});
+			FlxTween.tween(bg, { alpha:0}, 0.3, { ease: FlxEase.quartInOut});
+			FlxTween.tween(grid, { alpha:0}, 0.3, { ease: FlxEase.quartInOut});
+			FlxTween.tween(gradientBar, { alpha:0}, 0.3, { ease: FlxEase.quartInOut});
+			FlxTween.tween(side, { alpha:0}, 0.3, { ease: FlxEase.quartInOut});
+			FlxTween.tween(descBox, { alpha:0}, 0.3, { ease: FlxEase.quartInOut});
+			FlxTween.tween(descText, { alpha:0}, 0.3, { ease: FlxEase.quartInOut});
+			
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
 			TitleState.isPlaying = false;
@@ -345,7 +385,7 @@ class ModifiersState extends MusicBeatState
 				}
 			}
 
-			if(controls.RESET)
+			if (resetted)
 			{
 				for (i in 0...optionsArray.length)
 				{
@@ -372,7 +412,6 @@ class ModifiersState extends MusicBeatState
 					}
 					leOption.change();
 				}
-				FlxG.sound.play(Paths.sound('cancelMenu'));
 				reloadCheckboxes();
 			}
 		}

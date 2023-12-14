@@ -371,6 +371,9 @@ class TitleState extends MusicBeatState
 			skipIntro();
 		else
 			initialized = true;
+			
+		if (ModsMenuState.waitingToRestart)
+			skipIntro();
 
 		// credGroup.add(credTextShit);
 	}
@@ -472,11 +475,13 @@ class TitleState extends MusicBeatState
 				FlxG.camera.flash(ClientPrefs.data.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 				FlxG.camera.zoom += 0.090;
+				
                 FlxTween.tween(FlxG.camera, {zoom: 1.04}, 0.2, {ease: FlxEase.cubeInOut, type: ONESHOT, startDelay: 0});
                 FlxTween.tween(FlxG.camera, {zoom: 1}, 0.2, {ease: FlxEase.cubeInOut, type: ONESHOT, startDelay: 0.25});
 				FlxTween.tween(gfDance, {y:2000}, 2.5, {ease: FlxEase.expoInOut});
 				FlxTween.tween(titleText, {y: 2000}, 2.5, {ease: FlxEase.expoInOut});
 				FlxTween.tween(gradientBar, {y: 2000}, 2.5, {ease: FlxEase.expoInOut});
+				
 	        	if (logoBl != null) FlxTween.tween(logoBl, {alpha: 0}, 1.2, {ease: FlxEase.expoInOut});
 				if (logoBl != null) FlxTween.tween(logoBl, {y: 2000}, 2.5, {ease: FlxEase.expoInOut});
 	        	if (logo != null) FlxTween.tween(logo, {alpha: 0}, 1.2, {ease: FlxEase.expoInOut});
@@ -584,21 +589,6 @@ class TitleState extends MusicBeatState
 				}
 			}
 		}
-		else
-		{
-			for (i in 0...textArray.length)
-			{
-				var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
-				money.screenCenter(X);
-				money.y += (i * 60) + 200 + offset;
-				if(credGroup != null && textGroup != null) {
-					credGroup.add(money);
-					textGroup.add(money);
-				}
-				money.y -= 350;
-				FlxTween.tween(money, {y: money.y + 350}, 0.5, {ease: FlxEase.expoOut, startDelay: 0.0});
-			}
-		}
 	}
 
 	function addMoreText(text:String, ?offset:Float = 0)
@@ -617,18 +607,6 @@ class TitleState extends MusicBeatState
 					});
 				credGroup.add(coolText);
 				textGroup.add(coolText);
-			}
-		}
-		else
-		{
-			if(textGroup != null && credGroup != null) {
-				var coolText:Alphabet = new Alphabet(0, 0, text, true);
-				coolText.screenCenter(X);
-				coolText.y += (textGroup.length * 60) + 200 + offset;
-				credGroup.add(coolText);
-				textGroup.add(coolText);
-				coolText.y += 750;
-				FlxTween.tween(coolText, {y: coolText.y - 750}, 0.5, {ease: FlxEase.expoOut, startDelay: 0.0});
 			}
 		}
 	}

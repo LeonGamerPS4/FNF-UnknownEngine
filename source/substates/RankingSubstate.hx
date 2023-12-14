@@ -22,6 +22,7 @@ import flixel.addons.transition.FlxTransitionableState;
 
 import states.StoryMenuState;
 import states.FreeplayState;
+import states.PlayState;
 import states.TitleState;
 import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
@@ -32,13 +33,17 @@ class RankingSubstate extends MusicBeatSubstate
 
 	var rank:FlxSprite = new FlxSprite(-200, 730);
 	var combo:FlxSprite = new FlxSprite(-200, 730);
+	
 	public static var hint:FlxText;
 	public static var comboRank:String = "NA";
 	public static var ranking:String = "NA";
+	public static var resetTheFuckingRank:Bool = false;	
+	
 	var rankingNum:Int = 15;
 
 	public function new(x:Float, y:Float)
 	{
+		
 		super();
 
 		generateRanking();
@@ -93,21 +98,23 @@ class RankingSubstate extends MusicBeatSubstate
 		hint.updateHitbox();
 		add(hint);
 		
-		if (comboRank == "MFC")
+		if (comboRank == "MFC" && PlayState.marvelousFullRank)
 			hint.text = "Congrats! You're perfect!";
-		else if (comboRank == "GFC")
+		else if (comboRank == "GFC" && PlayState.goodFullRank)
 			hint.text = "You're doing great! Try getting only sicks for MFC";
-		else if (comboRank == "FC")
+		else if (comboRank == "FC" && PlayState.fullRank)
 			hint.text = "Good job. Try getting goods at minimum for GFC.";
-		else if (comboRank == "SDCB")
+		else if (comboRank == "SDCB" && PlayState.singleDigitRank)
 			hint.text = "Nice. Try not missing at all for FC.";
 
 		if (ClientPrefs.getGameplaySetting('botplay'))
 		{
 			hint.y -= 35;
-			comboRank = "FC";
 			hint.text = "If you wanna gather that rank, disable botplay.";
 		}
+		
+		//if (Highscore.resetSong(song, difficulty))
+			//ranking = "NA";
 
 		if (PlayState.deathCounter >= 30)
 		{
@@ -137,6 +144,14 @@ class RankingSubstate extends MusicBeatSubstate
 
 		if (FlxG.keys.justPressed.ANY || ClientPrefs.getGameplaySetting('practice'))
 		{
+			resetTheFuckingRank = false;
+			
+			PlayState.singleDigitRank = false;
+			PlayState.fullRank = false;
+			PlayState.alrightFullRank = false;
+			PlayState.goodFullRank = false;
+			PlayState.marvelousFullRank = false;
+			
 			if (PlayState.isStoryMode) 
 			{
 				if (PlayState.storyPlaylist.length <= 0)
@@ -181,11 +196,21 @@ class RankingSubstate extends MusicBeatSubstate
 
 	function generateRanking():String
 	{	
-
+		if (PlayState.marvelousFullRank) // Marvelous (SICK) Full Combo
+			RankingSubstate.comboRank = "MFC";
+		else if (PlayState.goodFullRank) // Good Full Combo (Nothing but Goods & Sicks)
+			RankingSubstate.comboRank = "GFC";
+		else if (PlayState.alrightFullRank) // Alright Full Combo (Bads, Goods and Sicks)
+			RankingSubstate.comboRank = "AFC";
+		else if (PlayState.fullRank) // Regular FC
+			RankingSubstate.comboRank = "FC";
+		else if (PlayState.singleDigitRank) // Single Digit Combo Breaks
+			RankingSubstate.comboRank = "SDCB";
+			
 		// WIFE TIME :)))) (based on Wife3)
 
 		var wifeConditions:Array<Bool> = [
-			PlayState.accPercent >= 99.9935, // P
+			PlayState.accPercent >= 100, // P
 			PlayState.accPercent >= 99.980, // X
 			PlayState.accPercent >= 99.950, // X-
 			PlayState.accPercent >= 99.90, // SS+
@@ -247,6 +272,9 @@ class RankingSubstate extends MusicBeatSubstate
 
 				if (PlayState.deathCounter >= 30 || PlayState.accPercent == 0)
 					ranking = "F";
+					
+				//if (Highscore.resetSong(song, difficulty))
+					//ranking = "NA";
 				break;
 			}
 		}

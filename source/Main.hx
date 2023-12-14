@@ -133,6 +133,7 @@ class Main extends Sprite
 		#end
 
 		#if desktop
+		//DiscordClient.prepare();
 		DiscordClient.start();
 		#end
 

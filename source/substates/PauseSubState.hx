@@ -27,7 +27,7 @@ class PauseSubState extends MusicBeatSubstate
 	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Modifiers', 'Options', 'Exit'];
 	var difficultyChoices = [];
 	var exitChoices = ['Exit To Song Menu', 'Exit To Main Menu', 'Exit To Title', 'Quit Game', 'BACK'];
-	var charterChoices = ['Skip Time', 'End Song', 'Toggle Practice Mode', 'Toggle Botplay', 'Leave Charting Mode'];
+	var charterChoices = ['Skip Time', 'End Song', 'Toggle Practice Mode', 'Toggle Botplay', 'Leave Charting Mode', 'BACK'];
 	var curSelected:Int = 0;
 
 	public static var pauseMusic:FlxSound;
@@ -167,14 +167,15 @@ class PauseSubState extends MusicBeatSubstate
 			pauseMusic.volume += 0.01 * elapsed;
 
 		super.update(elapsed);
+		if (menuItems == charterChoices) {
+			updateSkipTextStuff();
+		}
 
 		if(controls.BACK)
 		{
 			close();
 			return;
 		}
-
-		updateSkipTextStuff();
 		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
@@ -280,29 +281,39 @@ class PauseSubState extends MusicBeatSubstate
 			
 			if (menuItems == exitChoices)
 			{
-				if(menuItems.length - 1 != curSelected && exitChoices.contains(daSelected)) {
+				if(menuItems.length - 1 != curSelected && exitChoices.contains(daSelected)) 
+				{
 					switch (daSelected)
 					{
 						case "Exit To Song Menu":
 							exitFromSong();
+							
 						case "Exit To Main Menu":
 							PlayState.deathCounter = 0;
 							PlayState.seenCutscene = false;
+							
+							Mods.loadTopMod();
 							ModifiersState.isPlayState = false;
 							states.TitleState.isPlaying = true;
+							
 							MusicBeatState.switchState(new states.MainMenuState());
 							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 							PlayState.changedDifficulty = false;
 							PlayState.chartingMode = false;
+							
 						case "Exit To Title":
 							PlayState.deathCounter = 0;
 							PlayState.seenCutscene = false;
+							
+							Mods.loadTopMod();
 							ModifiersState.isPlayState = false;
 							states.TitleState.isPlaying = true;
+							
 							MusicBeatState.switchState(new states.TitleState());
-							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+							FlxG.sound.playMusic(Paths.music('freakyMenu'));
 							PlayState.changedDifficulty = false;
 							PlayState.chartingMode = false;
+							
 						case "Quit Game":
 							System.exit(0);
 					}

@@ -44,7 +44,7 @@ class ChartSubstate extends MusicBeatSubstate
     var camLerp:Float = 0.32;
 
     var boombox:FlxSprite = new FlxSprite(0,0).loadGraphic(Paths.image('Boombox'));
-    var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x338F34EB, 0x0));
+    var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33160AF7, 0x0));
 	var gradientBar:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
 
     var blackBarThingie:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -64,7 +64,8 @@ class ChartSubstate extends MusicBeatSubstate
 		add(gradientBar);
 		gradientBar.scrollFactor.set(0, 0);
 
-		grid.velocity.set(40, 40);
+		grid.velocity.set(0.3, 20);
+		grid.alpha = 0.7;
 		add(grid);
 		grid.scrollFactor.set(0.07, 0.07);
 

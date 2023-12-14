@@ -25,7 +25,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var unknownEngineVersion:String = '2.5 PRE 4'; // Used for OutdatedState and PlayState
+	public static var unknownEngineVersion:String = '2.5 Beta'; // Used for updating and also PlayState
 	public static var micdUpVersion:String = '2.0.3';
 	public static var psychEngineVersion:String = '0.7.2';
 	
@@ -59,8 +59,6 @@ class MainMenuState extends MusicBeatState
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 	
-	var randomTxt:FlxText;
-	
 	var isTweening:Bool = false;
 	var lastString:String = '';
 	var camLerp:Float = 0.1;
@@ -76,6 +74,17 @@ class MainMenuState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
+		
+		FlxG.watch.addQuick("beatShit", curBeat);
+		FlxG.watch.addQuick("stepShit", curStep);
+		
+		if(FlxG.sound.music != null)
+			if (!FlxG.sound.music.playing)
+			{	
+				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+        		FlxG.sound.music.time = 9400;
+				FlxTween.tween(FlxG.sound.music, {volume: 0.7}, 0.4);
+			}
 
 		camGame = new FlxCamera();
 		camAchievement = new FlxCamera();
@@ -109,11 +118,11 @@ class MainMenuState extends MusicBeatState
 		add(gradientBar);
 		gradientBar.scrollFactor.set(0, 0);
 		
-		grid.velocity.set(40, 40);
+		grid.velocity.set(45, 16);
 		grid.alpha = 0;
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
-		grid.scrollFactor.set(0, 0);
+		grid.scrollFactor.set(0, 0.07);
 
 		beef.scrollFactor.x = 0;
 		beef.scrollFactor.y = 0;
@@ -170,17 +179,6 @@ class MainMenuState extends MusicBeatState
 		FlxTween.tween(bg, {angle: 0}, 1, {ease: FlxEase.quartInOut});
 		FlxTween.tween(side, {x: -80}, 0.9, {ease: FlxEase.quartInOut});
 		FlxTween.tween(beef, {x: 725}, 0.9, {ease: FlxEase.quartInOut});
-		
-		var bottomPanel:FlxSprite = new FlxSprite(0, FlxG.height - 100).makeGraphic(FlxG.width, 100, 0xFF000000);
-		bottomPanel.alpha = 0.5;
-		//add(bottomPanel);	
-		
-		randomTxt = new FlxText(20, FlxG.height - 80, 1000, "", 26);
-		randomTxt.scrollFactor.set();
-		randomTxt.setFormat("VCR OSD Mono", 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(randomTxt);
-		
-		bottomPanel.scrollFactor.set();
 
 		camGame.follow(camFollowPos, null, 1);
 		
@@ -198,7 +196,7 @@ class MainMenuState extends MusicBeatState
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
 		#else
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 44, 1250, "This is an unofficial build of FNF Redux. \n Do not report any bugs from this build.", 12);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 44, 1250, "this is not an official unknown engine build.\nthis might be pirated lol.", 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
@@ -224,6 +222,11 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		super.create();
+		
+		new FlxTimer().start(1, function(tmr:FlxTimer)
+		{
+			selectable = true;
+		});
 	}
 
 	var selectable:Bool = false;
@@ -234,24 +237,12 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		FlxG.watch.addQuick("beatShit", curBeat);
+	
 		if (FlxG.sound.music.volume < 0.8)
 		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 			if(FreeplayState.vocals != null) FreeplayState.vocals.volume += 0.5 * elapsed;
-		}
-		
-		if (!selectedSomethin){
-			if (isTweening){
-				randomTxt.screenCenter(X);
-				timer = 0;
-			}else{
-				randomTxt.screenCenter(X);
-				timer += elapsed;
-				if (timer >= 3)
-				{
-					changeText();
-				}
-			}
 		}
 
 		menuItems.forEach(function(spr:FlxSprite)
@@ -270,7 +261,7 @@ class MainMenuState extends MusicBeatState
 			spr.updateHitbox();
 		});
 
-		if (!selectedSomethin)
+		if (!selectedSomethin && selectable)
 		{
 			var shiftMult:Int = 1;
 			if (FlxG.keys.pressed.SHIFT)
@@ -367,6 +358,8 @@ class MainMenuState extends MusicBeatState
 								case 'options':
 									options.OptionsState.onPlayState = false;
 									LoadingState.loadAndSwitchState(new options.OptionsState());
+									FlxG.sound.music.stop();
+                                    FlxG.sound.music == null;
 							}
 						});
 					});
@@ -382,8 +375,6 @@ class MainMenuState extends MusicBeatState
 				camFollow.x = spr.getGraphicMidpoint().x;
 			}
 		});
-
-		FlxG.watch.addQuick("beatShit", curBeat);
 		
 		super.update(elapsed);
 	}
@@ -392,44 +383,7 @@ class MainMenuState extends MusicBeatState
 	{
 		super.beatHit();
         if(curBeat % 2 == 0)
-        	FlxG.camera.zoom += 0.025;
-	}
-	
-	function changeText()
-	{
-		var selectedText:String = '';
-		var textArray:Array<String> = CoolUtil.coolTextFile(Paths.txt('tipText'));
-	
-		randomTxt.alpha = 1;
-		isTweening = true;
-		selectedText = textArray[FlxG.random.int(0, (textArray.length - 1))].replace('--', '\n');
-		FlxTween.tween(randomTxt, {alpha: 0}, 1, {
-			ease: FlxEase.linear,
-			onComplete: function(shit:FlxTween)
-			{
-				if (selectedText != lastString)
-				{
-					randomTxt.text = selectedText;
-					lastString = selectedText;
-				}
-				else
-				{
-					selectedText = textArray[FlxG.random.int(0, (textArray.length - 1))].replace('--', '\n');
-					randomTxt.text = selectedText;
-				}
-
-				randomTxt.alpha = 0;
-
-				FlxTween.tween(randomTxt, {alpha: 1}, 1, {
-					ease: FlxEase.linear,
-					onComplete: function(shit:FlxTween)
-					{
-						isTweening = false;
-					}
-					
-				});
-			}
-		});
+        	camGame.zoom += 0.025;
 	}
 
 	function changeItem(huh:Int = 0)

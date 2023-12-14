@@ -12,11 +12,6 @@ class Highscore
 		var daSong:String = formatSong(song, diff);
 		setScore(daSong, 0);
 		setRating(daSong, 0);
-		setRank(daSong, 0);
-	}
-	
-	public static function resetRank(song:String, diff:Int = 0):Void
-	{
 		substates.RankingSubstate.ranking = "NA";
 	}
 
@@ -127,10 +122,11 @@ class Highscore
 	
 	public static function getRank(song:String, diff:Int):Int
 	{
-		if (!songRanks.exists(formatSong(song, diff)))
+		var daSong:String = formatSong(song, diff);
+		if (!songRanks.exists(daSong))
 			setRank(formatSong(song, diff), 16);
 
-		return songRanks.get(formatSong(song, diff));
+		return songRanks.get(daSong);
 	}
 
 	public static function getWeekScore(week:String, diff:Int):Int

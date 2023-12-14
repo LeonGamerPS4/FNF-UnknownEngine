@@ -22,7 +22,8 @@ class SaveVariables {
 	public var splashSkin:String = 'Psych';
 	public var scoreType:String = 'Unknown';
 	public var coloredHealthBar:Bool = true;
-	public var iconBop:String = 'Bop';
+	public var smoothHealth:Bool = true;
+	public var iconBop:String = 'Bop 1';
 	public var splashAlpha:Float = 0.6;
 	public var lowQuality:Bool = false;
 	public var shaders:Bool = true;
@@ -30,6 +31,7 @@ class SaveVariables {
 	public var framerate:Int = 60;
 	public var camZooms:Bool = true;
 	public var hideHud:Bool = false;
+	public var charIcons:Bool = true;
 	public var noteOffset:Int = 0;
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
@@ -42,6 +44,8 @@ class SaveVariables {
 		[0xFF71E300, 0xFFF6FFE6, 0xFF003100],
 		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]];
 
+	public var laneUnderlayOpacity:Float = 0;
+	public var iconZoom:Float = 1.2;
 	public var colorblindMode:String = 'None';
 	public var ghostTapping:Bool = true;
 	public var timeBarType:String = 'Elapsed / Length';
@@ -49,6 +53,7 @@ class SaveVariables {
 	public var scoreZoom:Bool = true;
 	public var noReset:Bool = false;
 	public var healthBarAlpha:Float = 1;
+	public var stripedBar:Bool = false;
 	public var hitsoundVolume:Float = 0;
 	public var hitsoundType:String = 'osu! (Default)';
 	public var menuMusic:String = 'Gettin\' Freaky (Hydra Remix)';

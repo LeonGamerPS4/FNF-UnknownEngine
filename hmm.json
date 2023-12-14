@@ -56,6 +56,13 @@
       "version": null
     },
     {
+      "name": "discord_rpc",
+      "type": "git",
+      "dir": null,
+      "ref": "main",
+      "url": "https://github.com/Aidan63/linc_discord-rpc"
+    },
+    {
       "name": "hxdiscord_rpc",
       "type": "git",
       "dir": null,

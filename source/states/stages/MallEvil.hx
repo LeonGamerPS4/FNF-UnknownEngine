@@ -1,7 +1,7 @@
 package states.stages;
 
-import flixel.math.FlxPoint;
 import states.stages.objects.*;
+import states.LoadingState;
 
 class MallEvil extends BaseStage
 {
@@ -33,6 +33,7 @@ class MallEvil extends BaseStage
 	function winterHorrorlandCutscene()
 	{
 		camHUD.visible = false;
+		LoadingState.globeTrans = false;
 		inCutscene = true;
 
 		FlxG.sound.play(Paths.sound('Lights_Turn_On'));

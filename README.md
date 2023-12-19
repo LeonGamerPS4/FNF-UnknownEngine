@@ -1,8 +1,9 @@
-# Friday Night Funkin' REDUX (Unknown Engine) (WIP)
+# Friday Night Funkin' Unknown Engine 2.5 (WIP)
 
 ## THIS FORK IS STILL IN ALPHA, I CANNOT GUARANTEE THAT BUILDS WILL BE COMPLETELY STABLE
 
 No, winning icons won't be making a return.
+
 Stop using UE 1.4 and older, those versions are outdated and no longer supported.
 
 ## WOW ITS YET ANOTHER UNORIGINAL PSYCH FORK!!!
@@ -66,21 +67,22 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
   <summary>Psych Team</summary>
  
 - Shadow Mario - Programmer
-- RiverOaken - Artist
+- Riveren - Artist
 </details>
 
 <details>
   <summary>Special Thanks</summary>
  
 - bbpanzu - Ex-Programmer
-- Yoshubs - Ex-Programmer, also made the new input system
+- Yoshubs - Ex-Programmer
 - SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
 - KadeDev - Fixed some cool stuff on Chart Editor and other PRs
 - iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
 - PolybiusProxy - .MP4 Video Loader Library (hxCodec)
 - Keoiki - Note Splash Animations
 - Smokey - Sprite Atlas Support
-- Nebula the Zorua - LUA JIT Fork and some Lua reworks
+- Nebula the Zorua - some Lua reworks
+- superpowers04 - LUA JIT Fork
 </details>
 </details>
 

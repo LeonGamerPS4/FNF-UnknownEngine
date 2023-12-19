@@ -5,7 +5,6 @@ import animateatlas.AtlasFrameMaker;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
-import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 
 import openfl.display.BitmapData;
@@ -18,7 +17,7 @@ import openfl.geom.Rectangle;
 import lime.utils.Assets;
 import flash.media.Sound;
 
-import tjson.TJSON as Json;
+import haxe.Json;
 
 
 #if MODS_ALLOWED

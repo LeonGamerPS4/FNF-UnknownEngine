@@ -7,6 +7,7 @@ import lime.app.Application;
 import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
+import backend.PsychCamera;
 
 class MusicBeatState extends FlxUIState
 {
@@ -25,14 +26,15 @@ class MusicBeatState extends FlxUIState
 	}
 	
 	public static var windowNameSuffix:String = "";
-	public static var windowNamePrefix:String = "Friday Night Funkin' REDUX 2.5";
+	public static var windowNamePrefix:String = "Friday Night Funkin': Unknown Engine 2.5";
 
-	public static var camBeat:FlxCamera;
+	var _psychCameraInitialized:Bool = false;
 
 	override function create() {
-		camBeat = FlxG.camera;
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
+		
+		if(!_psychCameraInitialized) initPsychCamera();
 
 		super.create();
 
@@ -41,6 +43,16 @@ class MusicBeatState extends FlxUIState
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
+	}
+	
+	public function initPsychCamera():PsychCamera
+	{
+		var camera = new PsychCamera();
+		FlxG.cameras.reset(camera);
+		FlxG.cameras.setDefaultDrawTarget(camera, true);
+		_psychCameraInitialized = true;
+		//trace('initialized psych camera ' + Sys.cpuTime());
+		return camera;
 	}
 
 	public static var timePassedOnState:Float = 0;
@@ -126,25 +138,35 @@ class MusicBeatState extends FlxUIState
 		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
-	public static function switchState(nextState:FlxState = null) {
-		if(nextState == null) nextState = FlxG.state;
-		if(nextState == FlxG.state)
-		{
-			resetState();
+	public static function switchState(nextState:FlxState, ?fadeDuration:Float = 0.65/*, ?dumpCache:Bool = false*/) {
+		// Custom made Trans in
+		var curState:Dynamic = FlxG.state;
+		var leState:MusicBeatState = curState;
+		if(!FlxTransitionableState.skipNextTransIn) {
+			leState.openSubState(new CustomFadeTransition(fadeDuration, false));
+			if(nextState == FlxG.state) {
+				CustomFadeTransition.finishCallback = function() {
+					FlxG.resetState();
+				};
+			} else {
+				CustomFadeTransition.finishCallback = function() {
+					FlxG.switchState(nextState);
+				};
+			}
 			return;
 		}
-
-		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
-		else startTransition(nextState);
 		FlxTransitionableState.skipNextTransIn = false;
+		if (nextState == FlxG.state)
+			FlxG.resetState();
+		else
+			FlxG.switchState(nextState);
 	}
 
-	public static function resetState() {
-		if(FlxTransitionableState.skipNextTransIn) FlxG.resetState();
-		else startTransition();
-		FlxTransitionableState.skipNextTransIn = false;
+	inline public static function resetState() {
+		MusicBeatState.switchState(FlxG.state);
 	}
 
+	/*
 	// Custom made Trans in
 	public static function startTransition(nextState:FlxState = null)
 	{
@@ -157,8 +179,9 @@ class MusicBeatState extends FlxUIState
 		else
 			CustomFadeTransition.finishCallback = function() FlxG.switchState(nextState);
 	}
+	*/
 
-	public static function getState():MusicBeatState {
+	inline public static function getState():MusicBeatState {
 		return cast (FlxG.state, MusicBeatState);
 	}
 

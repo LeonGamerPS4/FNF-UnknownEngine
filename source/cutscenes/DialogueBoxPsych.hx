@@ -1,13 +1,11 @@
 package cutscenes;
 
-import tjson.TJSON as Json;
+import haxe.Json;
 import openfl.utils.Assets;
 
 import objects.TypedAlphabet;
 import cutscenes.DialogueCharacter;
 
-// Gonna try to kind of make it compatible to Forever Engine,
-// love u Shubs no homo :flushedh4:
 typedef DialogueFile = {
 	var dialogue:Array<DialogueLine>;
 }

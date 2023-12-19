@@ -3,6 +3,8 @@ package options;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 
+import flixel.util.FlxGradient;
+
 import states.MainMenuState;
 import backend.StageData;
 
@@ -13,6 +15,14 @@ class OptionsState extends MusicBeatState
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
+	
+	private var camMenu:FlxCamera;
+	var menuMusic:FlxSound;
+	
+	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFE100, 0x0));
+	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
+	
+	var ExplainText:FlxText = new FlxText(20, 69, FlxG.width / 2, "", 48);
 
 	function openSelectedSubstate(label:String) {
 		switch(label) {
@@ -26,6 +36,8 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.VisualsUISubState());
 			case 'Gameplay':
 				openSubState(new options.GameplaySettingsSubState());
+			case 'Music':
+				openSubState(new options.MusicSettingsSubState());
 			case 'Adjust Delay and Combo':
 				MusicBeatState.switchState(new options.NoteOffsetState());
 		}
@@ -38,20 +50,62 @@ class OptionsState extends MusicBeatState
 		#if desktop
 		DiscordClient.changePresence("Options Menu", null);
 		#end
+		
+		menuMusic = new FlxSound();
+		menuMusic.loadEmbedded(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), true, true);
+		menuMusic.volume = 0;
+		menuMusic.play(false, FlxG.random.int(0, Std.int(menuMusic.length / 2)));
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		FlxG.sound.list.add(menuMusic);
+		
+		if (!FlxG.sound.music.playing && !onPlayState && ClientPrefs.data.pauseMusic != 'None')
+		{
+			FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), menuMusic.volume);
+			FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
+		}
+		else if (!FlxG.sound.music.playing && !onPlayState && ClientPrefs.data.pauseMusic == 'None')
+		{
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		}
+		
+		camMenu = initPsychCamera();
+		FlxCamera.defaultCameras = [camMenu];
+
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('oBG_Main'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
 		
-		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
-		grid.velocity.set(40, 40);
+		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x558DE7E5, 0xAAE6F0A9], 1, 90, true);
+		gradientBar.y = FlxG.height - gradientBar.height;
+		gradientBar.scrollFactor.set(0, 0);
+		
+		grid.velocity.set(21, 51);
 		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
-		add(grid);
+		grid.scrollFactor.set(0, 0.07);
+		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});		
+
+		var side:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('Options_Side'));
+		side.scrollFactor.x = 0;
+		side.scrollFactor.y = 0;
+		side.antialiasing = true;
+		side.x = 0;
+		
+		ExplainText.scrollFactor.x = 0;
+		ExplainText.scrollFactor.y = 0;
+		ExplainText.setFormat("VCR OSD Mono", 24, FlxColor.WHITE, CENTER);
+		ExplainText.alignment = LEFT;
+		ExplainText.x = 20;
+		ExplainText.y = 624;
+		ExplainText.setBorderStyle(OUTLINE, 0xFF000000, 5, 1);
+		ExplainText.alpha = 0;
 
 		bg.screenCenter();
 		add(bg);
+		add(gradientBar);
+		add(grid);
+		add(side);
+		add(ExplainText);
 
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
@@ -68,9 +122,18 @@ class OptionsState extends MusicBeatState
 		add(selectorLeft);
 		selectorRight = new Alphabet(0, 0, '<', true);
 		add(selectorRight);
+		
+		camMenu.zoom = 3;
+		FlxTween.tween(FlxG.camera, {zoom: 1}, 1.5, {ease: FlxEase.expoInOut});
+		FlxTween.tween(ExplainText, {alpha: 1}, 0.15, {ease: FlxEase.expoInOut});
 
 		changeSelection();
+		
 		ClientPrefs.saveSettings();
+		
+		#if desktop
+		MusicBeatState.windowNameSuffix = " - Options Menu";
+		#end
 
 		super.create();
 	}
@@ -80,27 +143,59 @@ class OptionsState extends MusicBeatState
 		ClientPrefs.saveSettings();
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float) 
+	{
 		super.update(elapsed);
 
-		if (controls.UI_UP_P) {
+		if (controls.UI_UP_P) 
+		{
 			changeSelection(-1);
 		}
-		if (controls.UI_DOWN_P) {
+		if (controls.UI_DOWN_P) 
+		{
 			changeSelection(1);
 		}
 
-		if (controls.BACK) {
+		if (controls.BACK) 
+		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxTween.tween(FlxG.camera, {zoom: 3}, 1, {ease: FlxEase.expoInOut});
 			if(onPlayState)
 			{
 				StageData.loadDirectory(PlayState.SONG);
-				MusicBeatState.switchState(new PlayState());
-				FlxG.sound.music.volume = 0;
+				LoadingState.globeTrans = false;
+				LoadingState.loadAndSwitchState(new PlayState());
+				FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
 			}
-			else MusicBeatState.switchState(new MainMenuState());
+			else 
+			{
+				MusicBeatState.switchState(new MainMenuState());
+				FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
+			}
 		}
-		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
+		
+		updateTexts();
+		
+		if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
+	}
+	
+	function updateTexts()
+	{
+		switch (options[curSelected])
+		{
+			case "Note Colors":
+				ExplainText.text = "NOTE COLORS:\nChange the colors of the funny notes.";
+			case "Controls":
+				ExplainText.text = "CONTROLS:\nChange your keybinds, however you want.";
+			case "Adjust Delay and Combo":
+				ExplainText.text = "ADJUST DELAY AND COMBO:\nChange the offset of the combo popup or the audio.";
+			case "Graphics":
+				ExplainText.text = "GRAPHICS:\nChange how the graphics work in game.";
+			case "Visuals and UI":
+				ExplainText.text = "VISUALS AND UI:\nChange the UI, menus, or audio of the game.";
+			case "Gameplay":
+				ExplainText.text = "GAMEPLAY: \nChange how in song gameplay works.";
+		}
 	}
 	
 	function changeSelection(change:Int = 0) {
@@ -131,6 +226,8 @@ class OptionsState extends MusicBeatState
 	override function destroy()
 	{
 		ClientPrefs.loadPrefs();
+		FlxG.sound.music.stop();
+		
 		super.destroy();
 	}
 }

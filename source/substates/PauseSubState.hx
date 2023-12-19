@@ -8,10 +8,15 @@ import backend.Song;
 
 import flixel.addons.transition.FlxTransitionableState;
 
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
+
 import flixel.util.FlxStringUtil;
 
 import states.StoryMenuState;
 import states.FreeplayState;
+import states.EndlessState;
+import states.ModifiersState;
 import options.OptionsState;
 
 class PauseSubState extends MusicBeatSubstate
@@ -21,11 +26,11 @@ class PauseSubState extends MusicBeatSubstate
 	var menuItems:Array<String> = [];
 	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Modifiers', 'Options', 'Exit'];
 	var difficultyChoices = [];
-	var exitChoices = ['Exit To Song Menu', 'Exit To Main Menu', 'Exit To Title', 'Exit Game', 'BACK'];
+	var exitChoices = ['Exit To Song Menu', 'Exit To Main Menu', 'Exit To Title', 'Quit Game', 'BACK'];
 	var charterChoices = ['Skip Time', 'End Song', 'Toggle Practice Mode', 'Toggle Botplay', 'Leave Charting Mode', 'BACK'];
 	var curSelected:Int = 0;
 
-	var pauseMusic:FlxSound;
+	public static var pauseMusic:FlxSound;
 	var practiceText:FlxText;
 	var skipTimeText:FlxText;
 	var skipTimeTracker:Alphabet;
@@ -77,6 +82,13 @@ class PauseSubState extends MusicBeatSubstate
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
+		
+		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFFFFF, 0x0));
+		grid.velocity.set(40, 40);
+		grid.alpha = 0;
+		FlxTween.tween(grid, {alpha: 0.3}, 0.5, {ease: FlxEase.quadOut});
+		add(grid);
+		grid.scrollFactor.set(0, 0.07);
 
 		var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.SONG.song, 32);
 		levelInfo.scrollFactor.set();
@@ -155,14 +167,15 @@ class PauseSubState extends MusicBeatSubstate
 			pauseMusic.volume += 0.01 * elapsed;
 
 		super.update(elapsed);
+		if (menuItems == charterChoices) {
+			updateSkipTextStuff();
+		}
 
 		if(controls.BACK)
 		{
 			close();
 			return;
 		}
-
-		updateSkipTextStuff();
 		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
@@ -248,11 +261,17 @@ class PauseSubState extends MusicBeatSubstate
 				PlayState.seenCutscene = false;
 				
 				Mods.loadTopMod();
-				if(PlayState.isStoryMode) {
+				ModifiersState.isPlayState = false;
+				states.TitleState.isPlaying = true;
+				
+				if (PlayState.isStoryMode)
 					MusicBeatState.switchState(new StoryMenuState());
-				} else {
+				else if (PlayState.isEndless)
+					MusicBeatState.switchState(new EndlessState());
+				else
 					MusicBeatState.switchState(new FreeplayState());
-				}
+					
+				
 				PlayState.cancelMusicFadeTween();
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				PlayState.changedDifficulty = false;
@@ -262,25 +281,39 @@ class PauseSubState extends MusicBeatSubstate
 			
 			if (menuItems == exitChoices)
 			{
-				if(menuItems.length - 1 != curSelected && exitChoices.contains(daSelected)) {
+				if(menuItems.length - 1 != curSelected && exitChoices.contains(daSelected)) 
+				{
 					switch (daSelected)
 					{
 						case "Exit To Song Menu":
 							exitFromSong();
+							
 						case "Exit To Main Menu":
 							PlayState.deathCounter = 0;
 							PlayState.seenCutscene = false;
+							
+							Mods.loadTopMod();
+							ModifiersState.isPlayState = false;
+							states.TitleState.isPlaying = true;
+							
 							MusicBeatState.switchState(new states.MainMenuState());
 							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 							PlayState.changedDifficulty = false;
 							PlayState.chartingMode = false;
+							
 						case "Exit To Title":
 							PlayState.deathCounter = 0;
 							PlayState.seenCutscene = false;
+							
+							Mods.loadTopMod();
+							ModifiersState.isPlayState = false;
+							states.TitleState.isPlaying = true;
+							
 							MusicBeatState.switchState(new states.TitleState());
-							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+							FlxG.sound.playMusic(Paths.music('freakyMenu'));
 							PlayState.changedDifficulty = false;
 							PlayState.chartingMode = false;
+							
 						case "Quit Game":
 							System.exit(0);
 					}
@@ -347,6 +380,17 @@ class PauseSubState extends MusicBeatSubstate
 					regenMenu();
 				case "Restart Song":
 					restartSong();
+				case 'Modifiers':
+					PlayState.instance.paused = true; // For lua
+					PlayState.instance.vocals.volume = 0;
+					MusicBeatState.switchState(new ModifiersState());
+					if(ClientPrefs.data.pauseMusic != 'None')
+					{
+						FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), pauseMusic.volume);
+						FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
+						FlxG.sound.music.time = pauseMusic.time;
+					}
+					ModifiersState.isPlayState = true;
 				case 'Options':
 					PlayState.instance.paused = true; // For lua
 					PlayState.instance.vocals.volume = 0;
@@ -448,8 +492,9 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		for (i in 0...menuItems.length) {
-			var item = new Alphabet(90, 320, menuItems[i], true);
-			item.isMenuItem = true;
+			var item = new Alphabet(0, FlxG.width/5 + (70 * i + 30), menuItems[i], true);
+			item.x += 30;
+			item.altRotation = true;
 			item.targetY = i;
 			grpMenuShit.add(item);
 

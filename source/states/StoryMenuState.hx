@@ -10,12 +10,15 @@ import flixel.graphics.FlxGraphic;
 import objects.MenuItem;
 import objects.MenuCharacter;
 
-import substates.GameplayChangersSubstate;
+import states.ModifiersState;
+
 import substates.ResetScoreSubState;
 
 class StoryMenuState extends MusicBeatState
 {
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
+	
+	var blankBG:FlxSprite;
 
 	var scoreText:FlxText;
 
@@ -45,8 +48,16 @@ class StoryMenuState extends MusicBeatState
 	{
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
+		
+		if (!TitleState.isPlaying)
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		
+		blankBG = new FlxSprite().loadGraphic(Paths.image('bBG_Main'));
+		blankBG.screenCenter();
+		blankBG.alpha = 0;
 
 		PlayState.isStoryMode = true;
+		PlayState.isEndless = false;
 		WeekData.reloadWeekFiles(true);
 		if(curWeek >= WeekData.weeksList.length) curWeek = 0;
 		persistentUpdate = persistentDraw = true;
@@ -81,7 +92,7 @@ class StoryMenuState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence("Campaign Menu", null);
 		#end
 
 		var num:Int = 0;
@@ -171,6 +182,10 @@ class StoryMenuState extends MusicBeatState
 		// add(rankText);
 		add(scoreText);
 		add(txtWeekTitle);
+		
+		add(blankBG);
+		
+		MusicBeatState.windowNameSuffix = " - Campaign Menu";
 
 		changeWeek();
 		changeDifficulty();
@@ -237,7 +252,10 @@ class StoryMenuState extends MusicBeatState
 			if(FlxG.keys.justPressed.CONTROL)
 			{
 				persistentUpdate = false;
-				openSubState(new GameplayChangersSubstate());
+				FlxG.sound.music.stop();
+				TitleState.isPlaying = false;
+				ModifiersState.fromCampaign = true;
+				MusicBeatState.switchState(new ModifiersState());
 			}
 			else if(controls.RESET)
 			{
@@ -255,6 +273,8 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
+			TitleState.isPlaying = true;
+			ModifiersState.fromCampaign = false;
 			MusicBeatState.switchState(new GamemodesMenuState());
 		}
 
@@ -287,6 +307,7 @@ class StoryMenuState extends MusicBeatState
 			{
 				PlayState.storyPlaylist = songArray;
 				PlayState.isStoryMode = true;
+				PlayState.isEndless = false;
 				selectedWeek = true;
 	
 				var diffic = Difficulty.getFilePath(curDifficulty);
@@ -308,7 +329,7 @@ class StoryMenuState extends MusicBeatState
 			{
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 
-				grpWeekText.members[curWeek].startFlashing();
+				grpWeekText.members[curWeek].isFlashing = true;
 
 				for (char in grpWeekCharacters.members)
 				{
@@ -319,10 +340,12 @@ class StoryMenuState extends MusicBeatState
 				}
 				stopspamming = true;
 			}
+			
+			FlxTween.tween(blankBG, {alpha: 1}, 1.1, {ease: FlxEase.quartInOut});
 
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
-				LoadingState.loadAndSwitchState(new PlayState(), true);
+				openSubState(new substates.ChartSubstate());
 				FreeplayState.destroyFreeplayVocals();
 			});
 			

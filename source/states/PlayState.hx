@@ -6,6 +6,7 @@ import backend.WeekData;
 import backend.Song;
 import backend.Section;
 import backend.Rating;
+import backend.LoopState;
 
 import flixel.FlxBasic;
 import flixel.FlxObject;
@@ -178,8 +179,12 @@ class PlayState extends MusicBeatState
 	public var boyfriend:Character = null;
 
 	public var notes:FlxTypedGroup<Note>;
+	public var allNotes:Array<Note> = [];
 	public var unspawnNotes:Array<Note> = [];
 	public var eventNotes:Array<EventNote> = [];
+	public var loopA:Float = 0;
+	public var loopB:Float;
+	public var loopState:LoopState = NONE;
 
 	public var camFollow:FlxObject;
 	private static var prevCamFollow:FlxObject;
@@ -199,6 +204,9 @@ class PlayState extends MusicBeatState
 
 	public var gfSpeed:Int = 1;
 	public var health:Float = 1;
+	
+	public static var maxHealth:Float = 2;
+	
 	public var healthPercentageDisplay:Float = 50;
 	public var butterBar:Float = 1;
 	public var combo:Int = 0;
@@ -224,6 +232,7 @@ class PlayState extends MusicBeatState
 
 	public var guitarHeroSustains:Bool = false;
 	public var instakillOnMiss:Bool = false;
+	public var harmfulMisses:Bool = false;
 	public var cpuControlled:Bool = false;
 	public var practiceMode:Bool = false;
 
@@ -419,7 +428,10 @@ class PlayState extends MusicBeatState
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain');
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss');
+		health = ClientPrefs.getGameplaySetting('startinghealth', 0.5) * 2.0;
+		maxHealth = ClientPrefs.getGameplaySetting('maxhealth', 1) * 2.0;
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill');
+		harmfulMisses = ClientPrefs.getGameplaySetting('harmfulmisses');
 		practiceMode = ClientPrefs.getGameplaySetting('practice');
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
@@ -799,7 +811,7 @@ class PlayState extends MusicBeatState
 		uiGroup.add(versionTxt);
 		
 		msTimeTxt = new FlxText(0, 0, 400, "", 32);
-		msTimeTxt.setFormat(Paths.font('vcr.ttf'), 32, FlxColor.CYAN, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		msTimeTxt.setFormat(Paths.font('phantomMuff.ttf'), 32, FlxColor.CYAN, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		msTimeTxt.scrollFactor.set();
 		msTimeTxt.alpha = 0;
 		msTimeTxt.visible = true;
@@ -1288,26 +1300,30 @@ class PlayState extends MusicBeatState
 		inCutscene = false;
 		var ret:Dynamic = callOnScripts('onStartCountdown', null, true);
 		if(ret != FunkinLua.Function_Stop) {
-			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
+		
+			if (!isEndless || isEndless && loops == 0)
+			{
+				if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
-			generateStaticArrows(0);
-			generateStaticArrows(1);
-			
-			playerLaneUnderlay.x = playerStrums.members[0].x - 25;
-			playerLaneUnderlay.screenCenter(Y);
-			opponentLaneUnderlay.x = opponentStrums.members[0].x - 25;
-			opponentLaneUnderlay.screenCenter(Y);
-			
-			for (i in 0...playerStrums.length) 
-			{
-				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
-			}
-			for (i in 0...opponentStrums.length) 
-			{
-				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-				//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
+				generateStaticArrows(0);
+				generateStaticArrows(1);
+				
+				playerLaneUnderlay.x = playerStrums.members[0].x - 25;
+				playerLaneUnderlay.screenCenter(Y);
+				opponentLaneUnderlay.x = opponentStrums.members[0].x - 25;
+				opponentLaneUnderlay.screenCenter(Y);
+				
+				for (i in 0...playerStrums.length) 
+				{
+					setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
+					setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+				}
+				for (i in 0...opponentStrums.length) 
+				{
+					setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
+					setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+					//if(ClientPrefs.data.middleScroll) opponentStrums.members[i].visible = false;
+				}
 			}
 
 			startedCountdown = true;
@@ -1684,6 +1700,7 @@ class PlayState extends MusicBeatState
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
 		FlxG.sound.music.onComplete = finishSong.bind();
 		vocals.play();
+		loopB = FlxG.sound.music.length - 100;
 
 		if(startOnTime > 0) setSongTime(startOnTime - 500);
 		startOnTime = 0;
@@ -1856,7 +1873,71 @@ class PlayState extends MusicBeatState
 				makeEvent(event, i);
 
 		unspawnNotes.sort(sortByTime);
+		//allNotes = deepCopyNotes(unspawnNotes);
+		
 		generatedMusic = true;
+	}
+	
+	/*
+	function deepCopyNotes(noteArray:Array<Note>, ?startingpoint:Float = 0):Array<Note>
+	{
+		var noteRef:Note = null;
+		var newNoteArray:Array<Note> = [];
+
+		for (note in noteArray)
+		{
+			if (note.strumTime > startingpoint)
+			{
+				noteRef = newNoteArray.length > 0 ? newNoteArray[newNoteArray.length - 1] : null;
+				var deepCopy:Note = new Note(note.strumTime, note.noteData, noteRef, note.isSustainNote, note.noteType);
+				deepCopy.mustPress = note.mustPress;
+				deepCopy.x = note.x;
+				newNoteArray.push(deepCopy);
+			}
+		}
+		return newNoteArray;
+	}
+	*/
+	
+	function loopHandler(abLoop:Bool):LoopState
+	{
+		FlxG.log.add("Made it" + abLoop);
+
+		if (abLoop)
+		{
+			switch (loopState)
+			{
+				case REPEAT | NONE:
+					if (!startingSong)
+						loopA = Conductor.songPosition;
+					else
+						loopA = 0;
+					loopState = ANODE;
+					FlxG.log.add("Setting A Node");
+				case ANODE:
+					loopB = Conductor.songPosition;
+					loopState = ABREPEAT;
+					FlxG.log.add("Setting B Node");
+				case ABREPEAT:
+					loopState = NONE;
+					FlxG.log.add("Removing Nodes");
+			}
+		}
+		else
+		{
+			switch (loopState)
+			{
+				case NONE | ABREPEAT:
+					loopA = 0;
+					loopB = FlxG.sound.music.length - 100;
+					loopState = REPEAT;
+					FlxG.log.add("Looping Entire Song");
+				case REPEAT | ANODE:
+					loopState = NONE;
+					FlxG.log.add("No longer Looping");
+			}
+		}
+		return loopState;
 	}
 
 	// called only once per different event (Used for precaching)
@@ -2210,11 +2291,12 @@ class PlayState extends MusicBeatState
 		}
 
 		var iconOffset:Int = 26;
+		
 		if (healthBar.bounds.max != null) {
 			if (health > healthBar.bounds.max) health = healthBar.bounds.max;
-		} else {
+		} else if (maxHealth > 100 && healthBar.bounds.max != null) {
 			// Old system for safety?? idk
-			if (health > 2) health = 2;
+			if (health > maxHealth) health = maxHealth;
 		}
 		
 		healthPercentageDisplay = health / 0.02; 
@@ -2225,15 +2307,29 @@ class PlayState extends MusicBeatState
 			iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
 			iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
+		
 		else if (ClientPrefs.data.iconBop == 'Bop 2')
 		{
 			iconP1.x = healthBar.barCenter - iconOffset;
 			iconP2.x = healthBar.barCenter - (iconP2.width - iconOffset);
 		}
+		
 		else if (ClientPrefs.data.iconBop == 'Individual Bop')
 		{
 			iconP1.x = healthBar.barCenter - iconOffset;
 			iconP2.x = healthBar.barCenter - 150 + iconOffset;
+		}
+		
+		var newP1:Float;
+		var oldP2:Float = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+		var newP2:Float;
+
+		newP1 = iconP1.x;
+		newP2 = iconP2.x;
+		if (healthBar.percent > 100 || healthBar.percent < 0) {
+			healthBar.offset.x = oldP2 - newP2;
+		} else {
+			healthBar.offset.x = 0;
 		}
 		
 		iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0;
@@ -2254,6 +2350,22 @@ class PlayState extends MusicBeatState
 		}
 		else if (!paused && updateTime)
 		{
+			if (isEndless)
+			{
+				if (loopState != NONE && Conductor.songPosition >= loopB)
+				{
+					Conductor.songPosition = loopA;
+					FlxG.sound.music.time = loopA;
+					resyncVocals();
+					//unspawnNotes = deepCopyNotes(allNotes, loopA);
+					songScore = 0;
+					combo = 0;
+
+					updateScore();
+					updateScoreTxt();
+				}
+			}
+			
 			var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
 			songPercent = (curTime / songLength);
 
@@ -2794,6 +2906,8 @@ class PlayState extends MusicBeatState
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
+		if (isEndless) return;
+	
 		updateTime = false;
 		FlxG.sound.music.volume = 0;
 		vocals.volume = 0;
@@ -2877,10 +2991,9 @@ class PlayState extends MusicBeatState
 				startingSong = true;
 
 				Conductor.songPosition = 0;
-				startCallback();
-				RecalculateRating();
+				PlayState.SONG = Song.loadFromJson(SONG.song);
 				cacheCountdown();
-				cachePopUpScore();
+				startCountdown();
 			}
 			
 			if (doDeathCheck() && !ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay'))
@@ -3440,15 +3553,23 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		
+		if (harmfulMisses) 
+			maxHealth -= note.missHealth * healthLoss;
 
-		if(instakillOnMiss)
+		if (instakillOnMiss)
 		{
 			vocals.volume = 0;
 			doDeathCheck(true);
 		}
+		
 		combo = 0;
 
 		health -= subtract * healthLoss;
+		
+		if (harmfulMisses) 
+			maxHealth -= subtract * healthLoss;
+		
 		if(!practiceMode) songScore -= 10;
 		if(!endingSong) songMisses++;
 		totalPlayed++;

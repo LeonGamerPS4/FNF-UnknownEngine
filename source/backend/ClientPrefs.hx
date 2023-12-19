@@ -79,7 +79,10 @@ class SaveVariables {
 		'instakill' => false,
 		'practice' => false,
 		'botplay' => false,
-		'opponentplay' => false
+		'opponentplay' => false,
+		'harmfulmisses' => false,
+		'startinghealth' => 0.5,
+		'maxhealth' => 1
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];

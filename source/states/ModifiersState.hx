@@ -31,8 +31,18 @@ class ModifiersState extends MusicBeatState
 	private var descBox:FlxSprite;
 	private var descText:FlxText;
 	
-	var goption:GameplayOption = new GameplayOption('Scroll Type:', "Set the scroll speed type. Multiplicative multiplies the scroll speed, while Constant sets the scroll speed itself. Can be changed with both types.", 'scrolltype', 'string', 'multiplicative', ["multiplicative", "constant"]);
-	var loption:GameplayOption = new GameplayOption('Scroll Speed:', "Set how fast the chart speed is. The higher the amount, the faster the notes go. Can be changed numerically.", 'scrollspeed', 'float', 1);
+	var goption:GameplayOption = new GameplayOption('Scroll Type:', 
+		"Sets the scroll speed type. Multiplicative multiplies the scroll speed, while Constant sets the scroll speed itself. Can be changed with both types.", 
+		'scrolltype', 
+		'string', 
+		'multiplicative', 
+		["multiplicative", "constant"]);
+		
+	var loption:GameplayOption = new GameplayOption('Scroll Speed:', 
+		"Sets how fast the chart speed is. The higher the amount, the faster the notes go. Can be changed numerically.", 
+		'scrollspeed', 
+		'float', 
+		1);
 	
 	var menuMusic:FlxSound;
 
@@ -47,7 +57,11 @@ class ModifiersState extends MusicBeatState
 		optionsArray.push(loption);
 
 		#if FLX_PITCH
-		var option:GameplayOption = new GameplayOption('Playback Rate:', "Change the speed of the song and its pitch. 1.2 is Hifi, 0.8 is Lofi, but you can set it to anything from 0.5 to 3. Can be changed numerically.", 'songspeed', 'float', 1);
+		var option:GameplayOption = new GameplayOption('Playback Rate:', 
+			"Change the speed of the song and its pitch. 1.2 is Hifi, 0.8 is Lofi, but you can set it to anything from 0.5 to 3. Can be changed numerically.", 
+			'songspeed', 
+			'float', 
+			1);
 		option.scrollSpeed = 1;
 		option.minValue = 0.5;
 		option.maxValue = 3.0;
@@ -57,7 +71,11 @@ class ModifiersState extends MusicBeatState
 		optionsArray.push(option);
 		#end
 
-		var option:GameplayOption = new GameplayOption('Health Gain Multiplier:', "Set how fast you can regain your health. The higher, the faster you can regenerate health. Can be changed numerically.", 'healthgain', 'float', 1);
+		var option:GameplayOption = new GameplayOption('Health Gain Multiplier:', 
+			"Sets how fast you can regain your health. The higher, the faster you can regenerate health. Can be changed numerically.", 
+			'healthgain', 
+			'float', 
+			1);
 		option.scrollSpeed = 2.5;
 		option.minValue = 0;
 		option.maxValue = 5;
@@ -65,17 +83,65 @@ class ModifiersState extends MusicBeatState
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		var option:GameplayOption = new GameplayOption('Health Loss Multiplier:', "Set how fast you can lose your health, or not lose any at all. The higher, the faster you can lose health. Can be changed numerically.", 'healthloss', 'float', 1);
+		var option:GameplayOption = new GameplayOption('Health Loss Multiplier:', 
+			"Sets how fast you can lose your health, or not lose any at all. The higher, the faster you can lose health. Can be changed numerically.", 
+			'healthloss', 
+			'float', 
+			1);
 		option.scrollSpeed = 2.5;
 		option.minValue = 0.5;
 		option.maxValue = 5;
 		option.changeValue = 0.1;
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
+		
+		var option:GameplayOption = new GameplayOption('Starting Health', 
+			"Sets your health when starting a song. Can be changed numerically.", 
+			'startinghealth', 
+			'percent', 
+			0.5);
+		option.scrollSpeed = 1.7;
+		option.minValue = 0.01;
+		option.maxValue = 2;
+		option.changeValue = 0.01;
+		option.displayFormat = '%v%';
+		optionsArray.push(option);
 
-		optionsArray.push(new GameplayOption('Instakill on Miss', "Miss once, it's game over. Can be switched on or off.", 'instakill', 'bool', false));
-		optionsArray.push(new GameplayOption('Practice Mode', "Baby mode initiate. Practice your songs however you want, you won't be dying anytime soon. Score will not be saved. Can be switched on or off.", 'practice', 'bool', false));
-		optionsArray.push(new GameplayOption('Botplay', "Just let a bot play for you. Useful for showcase videos and impossible songs. Score will not be saved. Can be switched on or off.", 'botplay', 'bool', false));
+		var option:GameplayOption = new GameplayOption('Maximum Health', 
+			"Sets your maximum health during a song. Can be changed numerically.", 
+			'maxhealth', 
+			'percent', 
+			1);
+		option.scrollSpeed = 1.7;
+		option.minValue = 0.01;
+		option.maxValue = 2;
+		option.changeValue = 0.01;
+		option.displayFormat = '%v%';
+		optionsArray.push(option);
+
+		optionsArray.push(new GameplayOption('Instakill on Miss', 
+			"Miss once, it's game over. Can be switched on or off.", 
+			'instakill', 
+			'bool', 
+			false));
+			
+		optionsArray.push(new GameplayOption('Harmful Misses', 
+			"Be careful, because every time you miss, your max health decreases. It's possible for your max health to be 1% if you're not careful. Can be switched on or off.", 
+			'harmfulmisses', 
+			'bool', 
+			false));
+			
+		optionsArray.push(new GameplayOption('Practice Mode', 
+			"Baby mode initiate. Practice your songs however you want, you won't be dying anytime soon. Score will not be saved. Can be switched on or off.", 
+			'practice', 
+			'bool', 
+			false));
+			
+		optionsArray.push(new GameplayOption('Botplay', 
+			"Just let a bot play for you. Useful for showcase videos and impossible songs. Score will not be saved. Can be switched on or off.", 
+			'botplay', 
+			'bool', 
+			false));
 	}
 
 	public function getOptionByName(name:String)

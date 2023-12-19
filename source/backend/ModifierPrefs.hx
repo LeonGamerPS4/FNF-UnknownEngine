@@ -6,12 +6,11 @@ import states.PlayState;
 
 typedef ModiVariables =
 {
-	var HealthMult:Bool;
-	var HealthLoss:Bool;
+	var HealthMult:Float;
+	var HealthLoss:Float;
 	var KillOnMiss:Bool;
     var Practice:Bool;
 	var Botplay:Bool;
-	var GuitarHeroSustains:Bool;
 }
 
 class ModifierPrefs
@@ -36,8 +35,6 @@ class ModifierPrefs
             Practice: ClientPrefs.getGameplaySetting('practice'),
 			
 			Botplay: ClientPrefs.getGameplaySetting('botplay'),
-			
-			GuitarHeroSustains: ClientPrefs.data.guitarHeroSustains,
         };
     }
 
@@ -92,20 +89,16 @@ class ModifierPrefs
         //replaceValues();
     }
 
-	/*
     public static function replaceValues():Void
     {
-		ClientPrefs.getGameplaySetting('healthgain') = _modifiers.HealthMult;
+		_modifiers.HealthMult = ClientPrefs.getGameplaySetting('healthgain');
 			
-		ClientPrefs.getGameplaySetting('healthloss') = _modifiers.HealthLoss;
+		_modifiers.HealthLoss = ClientPrefs.getGameplaySetting('healthloss');
 			
-		ClientPrefs.getGameplaySetting('instakill') = _modifiers.KillOnMiss;
+		_modifiers.KillOnMiss = ClientPrefs.getGameplaySetting('instakill');
 		
-        ClientPrefs.getGameplaySetting('practice') = _modifiers.Practice;
+        _modifiers.Practice = ClientPrefs.getGameplaySetting('practice');
 			
-		ClientPrefs.getGameplaySetting('botplay') = _modifiers.Botplay;
-			
-		ClientPrefs.data.guitarHeroSustains = _modifiers.GuitarHeroSustains;
+		_modifiers.Botplay = ClientPrefs.getGameplaySetting('botplay');
     }
-	*/
 }

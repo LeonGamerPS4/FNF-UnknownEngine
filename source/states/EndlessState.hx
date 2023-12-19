@@ -155,7 +155,7 @@ class EndlessState extends MusicBeatState
 
 			// using a FlxGroup is too much fuss!
 			iconArray.push(icon);
-			add(icon);
+			//add(icon);
 			//icon.copyState = true;
 			icon.alpha = 1;
 

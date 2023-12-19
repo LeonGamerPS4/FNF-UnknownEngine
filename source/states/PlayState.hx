@@ -2199,6 +2199,11 @@ class PlayState extends MusicBeatState
 		notesPerSecond = npsArray.length;
 		if (notesPerSecond > maxNps)
 			maxNps = notesPerSecond;
+			
+		if (str == '?')
+			healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
+		else 
+			healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
 
 		if(botplayTxt != null && botplayTxt.visible) {
 			botplaySine += 180 * elapsed;
@@ -2229,7 +2234,7 @@ class PlayState extends MusicBeatState
 		if (healthBar.bounds.max != null && health > healthBar.bounds.max)
 			health = healthBar.bounds.max;
 			
-		//healthPercentageDisplay = health / 0.02; 
+		healthPercentageDisplay = health / 0.02; 
 
 		recalculateScoreText();
 		updateIconsScale(elapsed);
@@ -2453,8 +2458,6 @@ class PlayState extends MusicBeatState
 		health = value;
 		var newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
 		healthBar.percent = (newPercent != null ? newPercent : 0);
-		healthPercentageDisplay = (newPercent != null ? newPercent : 0);
-
 		iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
 		iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
 		return health;
@@ -2476,18 +2479,14 @@ class PlayState extends MusicBeatState
 		judgementCounter.text = 'NPS: ${notesPerSecond} (Max: ${maxNps})\nPerfects: ${perfects}\nSicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nAverage: ' + Math.round(averageMs) + 'ms\nRating: ' + ratingName + suffix + ' (' + ratingFC + ')';
 
 		if (str == '?')
-		{
-			healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
-		
+		{	
 			tempScore = 'Score: ${songScore}  (${thScore})' 
 			+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
 			+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
 			+ healthTxt + ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
 		} 
 		else 
-		{
-			healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
-		
+		{		
 			tempScore = 'Score: ${songScore} (${thScore})' 
 			+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
 			+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
@@ -3743,12 +3742,8 @@ class PlayState extends MusicBeatState
 			popUpScore(note);
 		
 			var gainHealth:Bool = true; // prevent health gain, as sustains are threated as a singular note
-			if (guitarHeroSustains && note.isSustainNote)
-				gainHealth = false;
-
-			if (gainHealth)
-				health += note.hitHealth * healthGain;
-				
+			if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
+			if (gainHealth) health += note.hitHealth * healthGain;
 			invalidateNote(note);
 		}
 	}

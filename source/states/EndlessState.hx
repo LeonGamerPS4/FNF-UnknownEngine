@@ -36,6 +36,8 @@ class EndlessState extends MusicBeatState
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
 
+	private var camMenu:FlxCamera;
+
 	var camLerp:Float = 0.1;
 	var selector:FlxText;
 	var selectedSomethin:Bool = false;
@@ -82,6 +84,10 @@ class EndlessState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Endless Menu", null);
 		#end
+		
+		camMenu = initPsychCamera();
+
+		FlxCamera.defaultCameras = [camMenu];
 		
 		if (!TitleState.isPlaying)
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
@@ -184,9 +190,9 @@ class EndlessState extends MusicBeatState
 		FlxTween.tween(side, {x: 0}, 0.6, {ease: FlxEase.quartInOut});
 
 		FlxTween.tween(bg, {alpha: 1}, 0.8, {ease: FlxEase.quartInOut});
-		FlxG.camera.zoom = 0.6;
-		FlxG.camera.alpha = 0;
-		FlxTween.tween(FlxG.camera, {zoom: 1, alpha: 1}, 0.7, {ease: FlxEase.quartInOut});
+		camMenu.zoom = 0.6;
+		camMenu.alpha = 0;
+		FlxTween.tween(camMenu, {zoom: 1, alpha: 1}, 0.7, {ease: FlxEase.quartInOut});
 
 		FlxTween.tween(scoreText, {alpha: 1}, 0.5, {ease: FlxEase.quartInOut});
 
@@ -354,8 +360,8 @@ class EndlessState extends MusicBeatState
 					
 					goingBack = true;
 					
-					FlxTween.tween(FlxG.camera, {zoom: 0.6}, 0.7, {ease: FlxEase.quartInOut});
-					FlxTween.tween(FlxG.camera, {alpha: -0.6}, 0.7, {ease: FlxEase.quartInOut});
+					FlxTween.tween(camMenu, {zoom: 0.6}, 0.7, {ease: FlxEase.quartInOut});
+					FlxTween.tween(camMenu, {alpha: -0.6}, 0.7, {ease: FlxEase.quartInOut});
 					FlxTween.tween(bg, {alpha: 0}, 0.7, {ease: FlxEase.quartInOut});
 					FlxTween.tween(grid, {alpha: 0}, 0.3, {ease: FlxEase.quartInOut});
 					FlxTween.tween(gradientBar, {alpha: 0}, 0.3, {ease: FlxEase.quartInOut});

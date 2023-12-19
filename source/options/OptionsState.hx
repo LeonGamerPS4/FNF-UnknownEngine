@@ -16,6 +16,7 @@ class OptionsState extends MusicBeatState
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 	
+	private var camMenu:FlxCamera;
 	var menuMusic:FlxSound;
 	
 	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFE100, 0x0));
@@ -66,6 +67,9 @@ class OptionsState extends MusicBeatState
 		{
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 		}
+		
+		camMenu = initPsychCamera();
+		FlxCamera.defaultCameras = [camMenu];
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('oBG_Main'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
@@ -119,7 +123,7 @@ class OptionsState extends MusicBeatState
 		selectorRight = new Alphabet(0, 0, '<', true);
 		add(selectorRight);
 		
-		FlxG.camera.zoom = 3;
+		camMenu.zoom = 3;
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 1.5, {ease: FlxEase.expoInOut});
 		FlxTween.tween(ExplainText, {alpha: 1}, 0.15, {ease: FlxEase.expoInOut});
 

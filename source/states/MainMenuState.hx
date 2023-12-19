@@ -32,7 +32,7 @@ class MainMenuState extends MusicBeatState
 	public static var curSelected:Int = 0;
 	public static var nightly:String = "a";
 
-	private var camGame:FlxCamera;
+	private var camMenu:FlxCamera;
 	private var camAchievement:FlxCamera;
 	var menuItems:FlxTypedGroup<FlxSprite>;
 
@@ -86,13 +86,12 @@ class MainMenuState extends MusicBeatState
 				FlxTween.tween(FlxG.sound.music, {volume: 0.7}, 0.4);
 			}
 
-		camGame = new FlxCamera();
+		camMenu = initPsychCamera();
 		camAchievement = new FlxCamera();
 		camAchievement.bgColor.alpha = 0;
 
-		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camAchievement);
-		FlxCamera.defaultCameras = [camGame];
+		FlxCamera.defaultCameras = [camMenu];
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -172,15 +171,15 @@ class MainMenuState extends MusicBeatState
 			menuItem.updateHitbox();
 		}
 
-		camGame.follow(camFollow, null, camLerp);
+		camMenu.follow(camFollow, null, camLerp);
 
-		camGame.zoom = 3;
-		FlxTween.tween(camGame, {zoom: 1}, 1.1, {ease: FlxEase.expoInOut});
+		camMenu.zoom = 3;
+		FlxTween.tween(camMenu, {zoom: 1}, 1.1, {ease: FlxEase.expoInOut});
 		FlxTween.tween(bg, {angle: 0}, 1, {ease: FlxEase.quartInOut});
 		FlxTween.tween(side, {x: -80}, 0.9, {ease: FlxEase.quartInOut});
 		FlxTween.tween(beef, {x: 725}, 0.9, {ease: FlxEase.quartInOut});
 
-		camGame.follow(camFollowPos, null, 1);
+		camMenu.follow(camFollowPos, null, 1);
 		
 		#if !html5
 		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 0, "Psych Engine v" + psychEngineVersion, 12);
@@ -328,7 +327,7 @@ class MainMenuState extends MusicBeatState
 
 					menuItems.forEach(function(spr:FlxSprite)
 					{
-						FlxTween.tween(camGame, {zoom: 10}, 1.6, {ease: FlxEase.expoIn});
+						FlxTween.tween(camMenu, {zoom: 10}, 1.6, {ease: FlxEase.expoIn});
 						FlxTween.tween(bg, {angle: 90}, 1.6, {ease: FlxEase.expoIn});
 						FlxTween.tween(spr, {x: -600}, 0.6, {
 							ease: FlxEase.backIn,
@@ -377,13 +376,6 @@ class MainMenuState extends MusicBeatState
 		});
 		
 		super.update(elapsed);
-	}
-	
-	override function beatHit()
-	{
-		super.beatHit();
-        if(curBeat % 2 == 0)
-        	camGame.zoom += 0.025;
 	}
 
 	function changeItem(huh:Int = 0)

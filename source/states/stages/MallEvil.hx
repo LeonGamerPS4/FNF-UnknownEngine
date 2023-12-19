@@ -1,6 +1,5 @@
 package states.stages;
 
-import flixel.math.FlxPoint;
 import states.stages.objects.*;
 import states.LoadingState;
 

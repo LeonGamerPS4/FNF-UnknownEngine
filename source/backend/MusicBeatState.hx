@@ -7,6 +7,7 @@ import lime.app.Application;
 import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
+import backend.PsychCamera;
 
 class MusicBeatState extends FlxUIState
 {
@@ -27,12 +28,13 @@ class MusicBeatState extends FlxUIState
 	public static var windowNameSuffix:String = "";
 	public static var windowNamePrefix:String = "Friday Night Funkin': Unknown Engine 2.5";
 
-	public static var camBeat:FlxCamera;
+	var _psychCameraInitialized:Bool = false;
 
 	override function create() {
-		camBeat = FlxG.camera;
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
+		
+		if(!_psychCameraInitialized) initPsychCamera();
 
 		super.create();
 
@@ -41,6 +43,16 @@ class MusicBeatState extends FlxUIState
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
+	}
+	
+	public function initPsychCamera():PsychCamera
+	{
+		var camera = new PsychCamera();
+		FlxG.cameras.reset(camera);
+		FlxG.cameras.setDefaultDrawTarget(camera, true);
+		_psychCameraInitialized = true;
+		//trace('initialized psych camera ' + Sys.cpuTime());
+		return camera;
 	}
 
 	public static var timePassedOnState:Float = 0;

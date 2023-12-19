@@ -33,6 +33,8 @@ class GamemodesMenuState extends MusicBeatState
 		'endless', 
 		'survival', 
 		'modifier'];
+	private var camMenu:FlxCamera;
+		
 	var camFollow:FlxObject;
 
 	var bg:FlxSprite = new FlxSprite(-89).loadGraphic(Paths.image('pBG_Main'));
@@ -49,6 +51,10 @@ class GamemodesMenuState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Gamemode Menu", null);
 		#end
+		
+		camMenu = initPsychCamera();
+
+		FlxCamera.defaultCameras = [camMenu];
 		
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -141,11 +147,11 @@ class GamemodesMenuState extends MusicBeatState
 			menuItem.updateHitbox();
 		}
 
-		FlxG.camera.follow(camFollow, null, camLerp);
+		camMenu.follow(camFollow, null, camLerp);
 
-		FlxG.camera.zoom = 3;
+		camMenu.zoom = 3;
 		side.alpha = 0;
-		FlxTween.tween(FlxG.camera, { zoom: 1}, 1.2, { ease: FlxEase.expoInOut });
+		FlxTween.tween(camMenu, { zoom: 1}, 1.2, { ease: FlxEase.expoInOut });
 		FlxTween.tween(bg, { y:-30}, 1, { ease: FlxEase.quartInOut,});
 		FlxTween.tween(side, { alpha:1}, 1, { ease: FlxEase.quartInOut});
 		FlxTween.tween(grid, { alpha:1}, 1.15, { ease: FlxEase.quartInOut});
@@ -216,7 +222,7 @@ class GamemodesMenuState extends MusicBeatState
 
 				DiscordClient.changePresence("In the Menus",  null);
 
-				FlxTween.tween(FlxG.camera, { zoom: 2}, 0.4, { ease: FlxEase.expoIn});
+				FlxTween.tween(camMenu, { zoom: 2}, 0.4, { ease: FlxEase.expoIn});
 				FlxTween.tween(bg, { y: 0-bg.height}, 0.4, { ease: FlxEase.expoIn });
 				FlxTween.tween(side, { alpha:0}, 0.4, { ease: FlxEase.quartInOut});
 				FlxTween.tween(grid, { alpha:0}, 0.4, { ease: FlxEase.quartInOut});
@@ -229,7 +235,7 @@ class GamemodesMenuState extends MusicBeatState
 
 				menuItems.forEach(function(spr:FlxSprite)
 				{
-					FlxTween.tween(FlxG.camera, { zoom: 12}, 0.8, { ease: FlxEase.expoIn, startDelay: 0.4});
+					FlxTween.tween(camMenu, { zoom: 12}, 0.8, { ease: FlxEase.expoIn, startDelay: 0.4});
 					FlxTween.tween(bg, { y: 0-bg.height}, 1.6, { ease: FlxEase.expoIn });
 					FlxTween.tween(side, { alpha:0}, 0.6, { ease: FlxEase.quartInOut, startDelay: 0.3});
 					FlxTween.tween(grid, { alpha:0}, 0.6, { ease: FlxEase.quartInOut, startDelay: 0.3});

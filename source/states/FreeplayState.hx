@@ -45,7 +45,7 @@ class FreeplayState extends MusicBeatState
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 	private var curPlaying:Bool = false;
 
-	private var iconArray:Array<HealthIcon> = [];
+	var iconArray:Array<HealthIcon> = [];
 
 	var bg:FlxSprite;
 	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFFFFF, 0x0));
@@ -141,29 +141,25 @@ class FreeplayState extends MusicBeatState
 
 		for (i in 0...songs.length)
 		{
-			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, true);
+			var songText:Alphabet = new Alphabet(-500, (70 * i) + 30, songs[i].songName, true);
 			songText.targetY = i;
 			lerpList.push(true);
 			grpSongs.add(songText);
 
 			Mods.currentModDirectory = songs[i].folder;
 			icon = new HealthIcon(songs[i].songCharacter);
-			//icon.bopMult = 0.95;
 			icon.sprTracker = songText;
 			
 			// too laggy with a lot of songs, so i had to recode the logic for it
 			songText.visible = songText.active = songText.isMenuItem = false;
 			icon.visible = icon.active = false;
+			
+			FlxTween.tween(songText, {x: 0}, 0.4, {ease: FlxEase.sineInOut});
 
 			// using a FlxGroup is too much fuss!
 			iconArray.push(icon);
 			add(icon);
-			//icon.copyState = true;
 			icon.alpha = 1;
-
-			// songText.x += 40;
-			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-			// songText.screenCenter(X);
 		}
 		WeekData.setDirectoryFromWeek();
 
@@ -258,6 +254,8 @@ class FreeplayState extends MusicBeatState
 	var instPlaying:Int = -1;
 	public static var vocals:FlxSound = null;
 	var holdTime:Float = 0;
+	
+	public var iconBopping = false;
 	
 	override function update(elapsed:Float)
 	{
@@ -385,6 +383,8 @@ class FreeplayState extends MusicBeatState
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
 				instPlaying = -1;
+				
+				iconBopping = false;
 
 				player.playingMusic = false;
 				player.switchPlayMusic();
@@ -440,7 +440,7 @@ class FreeplayState extends MusicBeatState
 					vocals.destroy();
 					vocals = null;
 				}
-
+				
 				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0.8);
 				if(vocals != null) //Sync vocals to Inst
 				{
@@ -449,10 +449,15 @@ class FreeplayState extends MusicBeatState
 				}
 
 				instPlaying = curSelected;
-				Conductor.set_bpm(PlayState.SONG.bpm);		
-				for (i in 0...iconArray.length)
-					iconArray[i].canBounce = false;
-				iconArray[instPlaying].canBounce = true;
+				
+				if (iconBopping)
+				{
+					Conductor.set_bpm(PlayState.SONG.bpm);		
+					for (i in 0...iconArray.length)
+						iconArray[i].canBounce = false;
+					iconArray[instPlaying].canBounce = true;
+					iconBopping = true;
+				}
 				
 				player.playingMusic = true;
 				player.curTime = 0;
@@ -532,22 +537,21 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
 
-		//updateTexts(elapsed);
 		super.update(elapsed);
 	}
 	
-	/*
 	override function beatHit() 
 	{
 		super.beatHit();
 		
-        if(curBeat % 1 == 0) 
+		if (iconBopping)
 		{
-        	camGame.zoom += 0.01;
-			iconArray[instPlaying].bounce();
+			if(curBeat % 1 == 0) 
+			{
+				iconArray[instPlaying].bounce();
+			}
 		}
 	}
-	*/
 
 	public static function destroyFreeplayVocals() {
 		if(vocals != null) {

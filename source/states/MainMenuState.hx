@@ -21,7 +21,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var unknownEngineVersion:String = '2.5 Beta'; // Used for updating and also PlayState
+	public static var unknownEngineVersion:String = '2.5 Beta (PUBLIC BUILD #4)'; // Used for updating and also PlayState
 	public static var micdUpVersion:String = '2.0.3';
 	public static var psychEngineVersion:String = '0.7.2';
 

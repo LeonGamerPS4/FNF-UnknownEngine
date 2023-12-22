@@ -56,6 +56,9 @@ class MusicPlayer extends FlxGroup
 		timeTxt = new FlxText(xPos, songTxt.y + 60, 0, "", 32);
 		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		add(timeTxt);
+		
+		if (playingMusic)
+			instance.iconArray[instance.instPlaying].canBounce = true;
 
 		for (i in 0...2)
 		{
@@ -81,7 +84,7 @@ class MusicPlayer extends FlxGroup
 	}
 
 	override function update(elapsed:Float)
-	{
+	{		
 		super.update(elapsed);
 
 		if (!playingMusic)
@@ -199,7 +202,7 @@ class MusicPlayer extends FlxGroup
 		}
 		updatePlaybackTxt();
 	
-		if (FlxG.keys.pressed.R)
+		if (instance.controls.RESET)
 		{
 			playbackRate = 1;
 			setPlaybackRate();
@@ -249,7 +252,7 @@ class MusicPlayer extends FlxGroup
 
 		if (playingMusic)
 		{
-			instance.bottomText.text = "Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song";
+			instance.bottomText.text = "Press SPACE to Pause the Song. / Press ESCAPE to Exit the Music Player. / Press R to Reset the Song\'s position and pitch.";
 			positionSong();
 			
 			progressBar.setRange(0, FlxG.sound.music.length);

@@ -286,25 +286,14 @@ class CharacterEditorState extends MusicBeatState
 			var anim = anims[curAnim];
 			if(!character.isAnimationNull())
 			{
-				ghost.setPosition(character.x, character.y);
-				ghost.offset.set(character.offset.x, character.offset.y);
-				ghost.flipX = character.flipX;
-				
 				var myAnim = anims[curAnim];
 				if(!character.isAnimateAtlas)
 				{
-					if(ghost.visible && ghost.graphic != null)
-					{
-						ghost.graphic.bitmap.dispose();
-						ghost.graphic.bitmap.disposeImage();
-						ghost.graphic.persist = false;
-						ghost.graphic.destroyOnNoUse = true;
-						ghost.graphic.destroy();
-					}
-					@:privateAccess
-					ghost.loadGraphic(character._frame.paintRotatedAndFlipped(null, character._flashPointZero, 0, ghost.flipX, ghost.flipY, false, true));
-					if(animateGhost != null) animateGhost.visible = false;
-					ghost.visible = true;
+					ghost.loadGraphic(character.graphic);
+					ghost.frames.frames = character.frames.frames;
+					ghost.animation.copyFrom(character.animation);
+					ghost.animation.play(character.animation.curAnim.name, true, false, character.animation.curAnim.curFrame);
+					ghost.animation.pause();
 				}
 				else if(myAnim != null) //This is VERY unoptimized and bad, I hope to find a better replacement that loads only a specific frame as bitmap in the future.
 				{
@@ -327,12 +316,25 @@ class CharacterEditorState extends MusicBeatState
 					animateGhost.anim.play('anim', true, false, character.atlas.anim.curFrame);
 					animateGhost.anim.pause();
 
-					animateGhost.offset.set(ghost.offset.x, ghost.offset.y);
-					animateGhost.flipX = ghost.flipX;
-					animateGhost.alpha = ghostAlpha;
-					animateGhost.visible = true;
 					animateGhostImage = character.imageFile;
-					ghost.visible = false;
+				}
+				
+				var spr:FlxSprite = !character.isAnimateAtlas ? ghost : animateGhost;
+				if(spr != null)
+				{
+					spr.setPosition(character.x, character.y);
+					spr.antialiasing = character.antialiasing;
+					spr.flipX = character.flipX;
+					spr.alpha = ghostAlpha;
+
+					spr.scale.set(character.scale.x, character.scale.y);
+					spr.updateHitbox();
+
+					spr.offset.set(character.offset.x, character.offset.y);
+					spr.visible = true;
+
+					var otherSpr:FlxSprite = (spr == animateGhost) ? ghost : animateGhost;
+					if(otherSpr != null) otherSpr.visible = false;
 				}
 				/*hideGhostButton.active = true;
 				hideGhostButton.alpha = 1;*/
@@ -622,13 +624,11 @@ class CharacterEditorState extends MusicBeatState
 
 		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function()
 			{
-				var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(healthIcon));
-				healthColorStepperR.value = coolColor.red;
-				healthColorStepperG.value = coolColor.green;
-				healthColorStepperB.value = coolColor.blue;
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+				var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(healthIcon));
+				character.healthColorArray[0] = coolColor.red;
+				character.healthColorArray[1] = coolColor.green;
+				character.healthColorArray[2] = coolColor.blue;
+				updateHealthBar();
 			});
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, healthIcon.getCharacter(), 8);
@@ -696,7 +696,10 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
-		if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
+		if(id != FlxUIInputText.CHANGE_EVENT && id != FlxUINumericStepper.CHANGE_EVENT) return;
+
+		if(sender is FlxUIInputText)
+		{
 			if(sender == healthIconInputText) {
 				var lastIcon = healthIcon.getCharacter();
 				healthIcon.changeIcon(healthIconInputText.text, false);
@@ -706,7 +709,9 @@ class CharacterEditorState extends MusicBeatState
 			else if(sender == imageInputText) {
 				character.imageFile = imageInputText.text;
 			}
-		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
+		}
+		else if(sender is FlxUINumericStepper)
+		{
 			if (sender == scaleStepper)
 			{
 				reloadCharacterImage();

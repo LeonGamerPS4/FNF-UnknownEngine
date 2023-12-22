@@ -2164,6 +2164,7 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var freezeCamera:Bool = false;
+	var allowDebugKeys:Bool = true;
 
 	override public function update(elapsed:Float)
 	{
@@ -2223,7 +2224,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		if(!endingSong && !inCutscene)
+		if(!endingSong && !inCutscene && allowDebugKeys)
 		{
 			if (controls.justPressed('debug_1'))
 				openChartEditor();
@@ -3583,6 +3584,7 @@ class PlayState extends MusicBeatState
 			doDeathCheck(true);
 		}
 		
+		var lastCombo:Int = combo;
 		combo = 0;
 
 		health -= subtract * healthLoss;
@@ -3599,7 +3601,7 @@ class PlayState extends MusicBeatState
 		var char:Character = boyfriend;
 		if((note != null && note.gfNote) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) char = gf;
 		
-		if(char != null && char.hasMissAnimations)
+		if(char != null && !note.noMissAnimation && char.hasMissAnimations)
 		{
 			var suffix:String = '';
 			if(note != null) suffix = note.animSuffix;
@@ -3607,7 +3609,7 @@ class PlayState extends MusicBeatState
 			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, direction)))] + 'miss' + suffix;
 			char.playAnim(animToPlay, true);
 			
-			if(char != gf && combo > 5 && gf != null && gf.animOffsets.exists('sad'))
+			if(char != gf && lastCombo > 5 && gf != null && gf.animOffsets.exists('sad'))
 			{
 				gf.playAnim('sad');
 				gf.specialAnim = true;
@@ -3651,11 +3653,8 @@ class PlayState extends MusicBeatState
 		strumPlayAnim(true, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
 		
-		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
-		if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
-
-		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
-		if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
+		var result:Dynamic = callOnLuas('opponentNoteHitPost', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+		if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('opponentNoteHitPost', [note]);
 
 		if (!note.isSustainNote)
 			invalidateNote(note);
@@ -3744,8 +3743,11 @@ class PlayState extends MusicBeatState
 			var gainHealth:Bool = true; // prevent health gain, as sustains are threated as a singular note
 			if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
 			if (gainHealth) health += note.hitHealth * healthGain;
-			invalidateNote(note);
 		}
+		
+		var result:Dynamic = callOnLuas('goodNoteHitPost', [notes.members.indexOf(note), leData, leType, isSus]);
+		if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('goodNoteHitPost', [note]);
+		if(!note.isSustainNote) invalidateNote(note);
 	}
 
 	public function invalidateNote(note:Note):Void {
@@ -4219,7 +4221,7 @@ class PlayState extends MusicBeatState
 
 		for (name in achievesToCheck) {
 			var unlock:Bool = false;
-			if (name != WeekData.getWeekFileName() + '_nomiss') // common achievements
+			if (name != WeekData.getWeekFileName() + '_nomiss' && Achievements.exists(name)) // common achievements
 			{
 				switch(name)
 				{

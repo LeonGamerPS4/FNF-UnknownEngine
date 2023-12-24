@@ -168,6 +168,17 @@ class ModifiersState extends MusicBeatState
 
 		FlxG.sound.list.add(menuMusic);
 		
+		if (!FlxG.sound.music.playing && !isPlayState && ClientPrefs.data.pauseMusic != 'None')
+		{
+			FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), menuMusic.volume);
+			FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
+		}
+		else if (!FlxG.sound.music.playing && !isPlayState && ClientPrefs.data.pauseMusic == 'None')
+		{
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		}
+		
+		
 		bg = new FlxSprite(0, 0).loadGraphic(Paths.image('modiBG_Main'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.x = 0;
@@ -251,16 +262,6 @@ class ModifiersState extends MusicBeatState
 		changeSelection();
 		reloadCheckboxes();
 		
-		if (!FlxG.sound.music.playing && !isPlayState && ClientPrefs.data.pauseMusic != 'None')
-		{
-			FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), menuMusic.volume);
-			FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
-		}
-		else if (!FlxG.sound.music.playing && !isPlayState && ClientPrefs.data.pauseMusic == 'None')
-		{
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-		}
-		
 		FlxTween.tween(bg, { alpha:1}, 0.8, { ease: FlxEase.quartInOut});
 		FlxTween.tween(grid, { alpha:0.6}, 0.8, { ease: FlxEase.quartInOut});
 		FlxTween.tween(descBox, { alpha:0.6}, 0.8, { ease: FlxEase.quartInOut});
@@ -327,7 +328,10 @@ class ModifiersState extends MusicBeatState
 			
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
-			TitleState.isPlaying = false;
+			new FlxTimer().start(0.4, function(tmr:FlxTimer)
+			{
+				FlxG.sound.music.stop();
+			});
 			if (isPlayState)
 			{
 				backend.StageData.loadDirectory(PlayState.SONG);
@@ -451,7 +455,7 @@ class ModifiersState extends MusicBeatState
 				}
 			}
 
-			if (resetted)
+			if (resetted || controls.RESET)
 			{
 				for (i in 0...optionsArray.length)
 				{

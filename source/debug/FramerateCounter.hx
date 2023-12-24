@@ -4,6 +4,7 @@ import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.system.System;
+import macros.GitCommitMacro;
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -14,17 +15,19 @@ class FramerateCounter extends TextField
 	/**
 		The current frame rate, expressed using frames-per-second
 	**/
-	public var currentFPS(default, null):Int;
-
+	public static var currentFPS(default, null):Int;
+	
 	/**
 		The current memory usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
 	**/
 	public var memoryMegas(get, never):Float;
 	
 	/**
-		The current amount of memory peaked
+		The current memory peak
 	**/
-	private var memPeak:Float = 0;
+	private var memPeak:Float;
+	
+	public static var fontName:String = "_sans";
 
 	@:noCompletion private var times:Array<Float>;
 
@@ -38,7 +41,7 @@ class FramerateCounter extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 12, color);
+		defaultTextFormat = new TextFormat(fontName, 12, color);
 		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
@@ -67,9 +70,11 @@ class FramerateCounter extends TextField
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
+		if (memoryMegas > memPeak) memPeak = memoryMegas;
 		text = 'FPS: ${currentFPS}'
-		+ '\nRAM: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}'
-		+ '\nUnknown Engine v' + states.MainMenuState.unknownEngineVersion;
+			+ '\nRAM: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}'
+			+ '\nRAM PEAK: ${flixel.util.FlxStringUtil.formatBytes(memPeak)}'
+			+ '\nUNKNOWN ENGINE v2.5 BETA - BUILD ${GitCommitMacro.commitNumber} (${GitCommitMacro.commitHash})';
 
 		textColor = 0xFFFFFFFF;
 		if (ClientPrefs.data.colorblindMode == "Invert")
@@ -77,7 +82,6 @@ class FramerateCounter extends TextField
 		if (currentFPS < FlxG.drawFramerate * 0.5)
 			textColor = 0xFFFF0000;
 	}
-
 	inline function get_memoryMegas():Float
 		return cast(System.totalMemory, UInt);
 }

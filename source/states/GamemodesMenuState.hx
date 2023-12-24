@@ -61,8 +61,8 @@ class GamemodesMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 		
-		if(FlxG.sound.music != null || !TitleState.isPlaying)
-			if (!FlxG.sound.music.playing || !TitleState.isPlaying)
+		if(FlxG.sound.music != null)
+			if (!FlxG.sound.music.playing)
 			{	
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 				FlxG.sound.music.time = 9400;
@@ -217,8 +217,6 @@ class GamemodesMenuState extends MusicBeatState
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				MusicBeatState.switchState(new MainMenuState());
-				
-				TitleState.isPlaying = true;
 
 				DiscordClient.changePresence("In the Menus",  null);
 
@@ -258,30 +256,23 @@ class GamemodesMenuState extends MusicBeatState
 								case 'week':
 									MusicBeatState.switchState(new StoryMenuState());
 									DiscordClient.changePresence("Campaign Menu",  null);
-									TitleState.isPlaying = true;
 								case 'freeplay':
 									MusicBeatState.switchState(new FreeplayState());
 									DiscordClient.changePresence("Freeplay Menu",  null);	
-									TitleState.isPlaying = true;
 								case 'modifier':
 									MusicBeatState.switchState(new ModifiersState());
-									ModifiersState.fromFreeplay = false;
-									ModifiersState.fromCampaign = false;
 									DiscordClient.changePresence("Modifier Menu",  null);
 									FlxG.sound.music.stop();
                                     FlxG.sound.music == null;										
 								case 'marathon':
 									FlxG.switchState(new /*MenuMarathon*/GamemodesMenuState());
 									DiscordClient.changePresence("Marathon Menu",  null);
-									TitleState.isPlaying = true;
 								case 'survival':
 									FlxG.switchState(new /*MenuSurvival*/GamemodesMenuState());
-									DiscordClient.changePresence("Survival Menu",  null);
-									TitleState.isPlaying = true;								
+									DiscordClient.changePresence("Survival Menu",  null);								
 								case 'endless':
 									MusicBeatState.switchState(new EndlessState());
 									DiscordClient.changePresence("Endless Menu",  null);
-									TitleState.isPlaying = true;
 							}
 						});
 				});

@@ -113,9 +113,8 @@ class Main extends Sprite
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if(fpsVar != null) {
+		if(fpsVar != null)
 			fpsVar.visible = ClientPrefs.data.showFPS;
-		}
 		#end
 
 		#if linux
@@ -144,10 +143,10 @@ class Main extends Sprite
 				if (cam != null && cam._filters != null)
 					resetSpriteCache(cam.flashSprite);
 			   }
-		     }
+			}
 
-		     if (FlxG.game != null)
-			 resetSpriteCache(FlxG.game);
+			if (FlxG.game != null)
+			resetSpriteCache(FlxG.game);
 		});
 	}
 

@@ -43,8 +43,6 @@ class TitleState extends MusicBeatState
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
 	public static var initialized:Bool = false;
-	
-	public static var isPlaying:Bool = false;
 
 	var blackScreen:FlxSprite;
 	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 1, 0xFFAA00AA);
@@ -129,7 +127,7 @@ class TitleState extends MusicBeatState
 		Highscore.load();
 
 		// IGNORE THIS!!!
-		titleJSON = Json.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
+		titleJSON = tjson.TJSON.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
 
 		#if TITLE_SCREEN_EASTER_EGG
 		if (FlxG.save.data.psychDevsEasterEgg == null) FlxG.save.data.psychDevsEasterEgg = ''; //Crash prevention
@@ -371,9 +369,6 @@ class TitleState extends MusicBeatState
 			skipIntro();
 		else
 			initialized = true;
-			
-		if (ModsMenuState.waitingToRestart)
-			skipIntro();
 
 		// credGroup.add(credTextShit);
 	}
@@ -569,45 +564,39 @@ class TitleState extends MusicBeatState
 
 	function createCoolText(textArray:Array<String>, ?offset:Float = 0)
 	{
-		if (!ModsMenuState.waitingToRestart)
+		for (i in 0...textArray.length)
 		{
-			for (i in 0...textArray.length)
-			{
-				var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
-				money.x = -1500;
-				FlxTween.quadMotion(money, -300, -100, 30 
-					+ (i * 70), 150 
-					+ (i * 130), 100 
-					+ (i * 70), 
-					80 
-					+ (i * 130), 0.4, true, {
-						ease: FlxEase.quadInOut
-					});
-				if(credGroup != null && textGroup != null) {
-					credGroup.add(money);
-					textGroup.add(money);
-				}
+			var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
+			money.x = -1500;
+			FlxTween.quadMotion(money, -300, -100, 30 
+				+ (i * 70), 150 
+				+ (i * 130), 100 
+				+ (i * 70), 
+				80 
+				+ (i * 130), 0.4, true, {
+					ease: FlxEase.quadInOut
+				});
+			if(credGroup != null && textGroup != null) {
+				credGroup.add(money);
+				textGroup.add(money);
 			}
 		}
 	}
 
 	function addMoreText(text:String, ?offset:Float = 0)
 	{
-		if (!ModsMenuState.waitingToRestart)
-		{
-			if(textGroup != null && credGroup != null) {
-				var coolText:Alphabet = new Alphabet(0, 0, text, true);
-				FlxTween.quadMotion(coolText, -300, -100, 10
-					+ (textGroup.length * 40), 150
-					+ (textGroup.length * 130), 30
-					+ (textGroup.length * 40),
-					80
-					+ (textGroup.length * 130), 0.4, true, {
-						ease: FlxEase.quadInOut
-					});
-				credGroup.add(coolText);
-				textGroup.add(coolText);
-			}
+		if(textGroup != null && credGroup != null) {
+			var coolText:Alphabet = new Alphabet(0, 0, text, true);
+			FlxTween.quadMotion(coolText, -300, -100, 10
+				+ (textGroup.length * 40), 150
+				+ (textGroup.length * 130), 30
+				+ (textGroup.length * 40),
+				80
+				+ (textGroup.length * 130), 0.4, true, {
+					ease: FlxEase.quadInOut
+				});
+			credGroup.add(coolText);
+			textGroup.add(coolText);
 		}
 	}
 
@@ -652,7 +641,6 @@ class TitleState extends MusicBeatState
 				case 1:
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
-					isPlaying = true;
 				case 2:
 					#if PSYCH_WATERMARKS
 					createCoolText(['Unknown Engine by'], 40);
@@ -676,23 +664,16 @@ class TitleState extends MusicBeatState
 					createCoolText(['In association', 'with'], -40);
 					#end
 				case 8:
-					if (!ModsMenuState.waitingToRestart)
-					{
-						psychSpr.x = -1500;
-						psychSpr.visible = true;
-						FlxTween.quadMotion(psychSpr, -700, -700, 50
-							+ (textGroup.length * 130), 150
-							+ (textGroup.length * 50), 100
-							+ (textGroup.length * 130),
-							80
-							+ (textGroup.length * 50), 0.4, true, {
-								ease: FlxEase.quadInOut
-							});
-					}
-					else
-					{
-						psychSpr.visible = true;
-					}
+					psychSpr.x = -1500;
+					psychSpr.visible = true;
+					FlxTween.quadMotion(psychSpr, -700, -700, 50
+						+ (textGroup.length * 130), 150
+						+ (textGroup.length * 50), 100
+						+ (textGroup.length * 130),
+						80
+						+ (textGroup.length * 50), 0.4, true, {
+							ease: FlxEase.quadInOut
+						});
 				case 9:
 					deleteCoolText();
 					psychSpr.visible = false;

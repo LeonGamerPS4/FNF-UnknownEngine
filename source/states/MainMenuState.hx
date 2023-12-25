@@ -21,7 +21,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var unknownEngineVersion:String = '2.5 Beta (PUBLIC BUILD #4)'; // Used for updating and also PlayState
+	public static var unknownEngineVersion:String = '2.5 Beta (PUBLIC BUILD #5)'; // Used for updating and also PlayState
 	public static var micdUpVersion:String = '2.0.3';
 	public static var psychEngineVersion:String = '0.7.2';
 
@@ -326,12 +326,17 @@ class MainMenuState extends MusicBeatState
 							{
 								case 'play':
 									MusicBeatState.switchState(new GamemodesMenuState());
+									
 								#if MODS_ALLOWED
 								case 'mods':
 									MusicBeatState.switchState(new ModsMenuState());
 								#end
+
+								#if ACHIEVEMENTS_ALLOWED
 								case 'awards':
 									MusicBeatState.switchState(new AchievementsMenuState());
+								#end
+								
 								case 'credits':
 									MusicBeatState.switchState(new CreditsState());
 								case 'options':

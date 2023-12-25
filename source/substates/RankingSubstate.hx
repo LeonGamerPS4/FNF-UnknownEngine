@@ -157,7 +157,6 @@ class RankingSubstate extends MusicBeatSubstate
 				if (PlayState.storyPlaylist.length <= 0)
 				{
 					Mods.loadTopMod();
-					TitleState.isPlaying = true;
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					#if desktop DiscordClient.resetClientID(); #end
 					
@@ -173,7 +172,6 @@ class RankingSubstate extends MusicBeatSubstate
 			{
 				trace('WENT BACK TO FREEPLAY??');
 				Mods.loadTopMod();
-				TitleState.isPlaying = true;
 				#if desktop DiscordClient.resetClientID(); #end
 
 				PlayState.cancelMusicFadeTween();

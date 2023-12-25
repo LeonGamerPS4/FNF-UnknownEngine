@@ -49,8 +49,13 @@ class StoryMenuState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 		
-		if (!TitleState.isPlaying)
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		if(FlxG.sound.music != null)
+			if (!FlxG.sound.music.playing)
+			{	
+				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+				FlxG.sound.music.time = 9400;
+				FlxTween.tween(FlxG.sound.music, {volume: 0.7}, 0.4);
+			}
 		
 		blankBG = new FlxSprite().loadGraphic(Paths.image('bBG_Main'));
 		blankBG.screenCenter();
@@ -202,7 +207,7 @@ class StoryMenuState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		// scoreText.setFormat('VCR OSD Mono', 32);
-		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, FlxMath.bound(elapsed * 30, 0, 1)));
+		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 30)));
 		if(Math.abs(intendedScore - lerpScore) < 10) lerpScore = intendedScore;
 
 		scoreText.text = "WEEK SCORE:" + lerpScore;
@@ -252,8 +257,12 @@ class StoryMenuState extends MusicBeatState
 			if(FlxG.keys.justPressed.CONTROL)
 			{
 				persistentUpdate = false;
-				FlxG.sound.music.stop();
-				TitleState.isPlaying = false;
+				FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
+				new FlxTimer().start(0.4, function(tmr:FlxTimer)
+				{
+					FlxG.sound.music.stop();
+					FlxG.sound.music == null;	
+				});
 				ModifiersState.fromCampaign = true;
 				MusicBeatState.switchState(new ModifiersState());
 			}
@@ -273,7 +282,6 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
-			TitleState.isPlaying = true;
 			ModifiersState.fromCampaign = false;
 			MusicBeatState.switchState(new GamemodesMenuState());
 		}

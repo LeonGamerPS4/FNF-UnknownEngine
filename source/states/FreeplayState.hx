@@ -92,8 +92,13 @@ class FreeplayState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxCamera.defaultCameras = [camGame];
 		
-		if (!TitleState.isPlaying)
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		if(FlxG.sound.music != null)
+			if (!FlxG.sound.music.playing)
+			{	
+				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+				FlxG.sound.music.time = 9400;
+				FlxTween.tween(FlxG.sound.music, {volume: 0.7}, 0.4);
+			}
 
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
@@ -124,7 +129,6 @@ class FreeplayState extends MusicBeatState
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
-		bg.alpha = 1;
 		bg.screenCenter();
 		
 		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x55FFBDF8, 0xAAFFFDF3], 1, 90, true);
@@ -265,8 +269,8 @@ class FreeplayState extends MusicBeatState
 		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
-		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, FlxMath.bound(elapsed * 24, 0, 1)));
-		lerpRating = FlxMath.lerp(lerpRating, intendedRating, FlxMath.bound(elapsed * 12, 0, 1));
+		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
+		lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
 
 		if (Math.abs(lerpScore - intendedScore) <= 10)
 			lerpScore = intendedScore;
@@ -402,7 +406,6 @@ class FreeplayState extends MusicBeatState
 					colorTween.cancel();
 				}
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				TitleState.isPlaying = true;
 				ModifiersState.fromFreeplay = false;
 				MusicBeatState.switchState(new GamemodesMenuState());
 			}
@@ -412,8 +415,13 @@ class FreeplayState extends MusicBeatState
 		{
 			selectedSomethin = true;
 			persistentUpdate = false;
-			FlxG.sound.music.stop();
 			MusicBeatState.switchState(new ModifiersState());
+			FlxTween.tween(FlxG.sound.music, {volume: 0}, 0.4);
+			new FlxTimer().start(0.4, function(tmr:FlxTimer)
+			{
+				FlxG.sound.music.stop();
+				FlxG.sound.music == null;
+			});
 			ModifiersState.fromFreeplay = true;
 		}
 		else if(FlxG.keys.justPressed.SPACE)
@@ -506,7 +514,6 @@ class FreeplayState extends MusicBeatState
 			}
 
 			FlxG.sound.play(Paths.sound('confirmMenu'));
-			TitleState.isPlaying = true;
 			
 			FlxTween.tween(bg, {alpha: 0}, 0.6, {ease: FlxEase.quartInOut, startDelay: 0.3});
 			FlxTween.tween(grid, {alpha: 0}, 0.6, {ease: FlxEase.quartInOut});
@@ -709,7 +716,7 @@ class FreeplayState extends MusicBeatState
 		super.destroy();
 
 		FlxG.autoPause = ClientPrefs.data.autoPause;
-		if (!FlxG.sound.music.playing)
+		if (!FlxG.sound.music.playing && !ModifiersState.fromFreeplay)
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 	}	
 }

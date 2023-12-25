@@ -178,14 +178,14 @@ class Alphabet extends FlxSpriteGroup
 	{
 		super.update(elapsed);
 		
-		final lerpVal:Float = FlxMath.bound(elapsed * 9.6, 0, 1);
+		final lerpVal:Float = FlxMath.bound(elapsed * 9.6);
 		
 		if (isMenuItem)
 		{
 			if(changeX)
-				x = FlxMath.lerp(x, (targetY * distancePerItem.x) + startPosition.x, lerpVal);
+				x = FlxMath.lerp((targetY * distancePerItem.x) + startPosition.x, x, lerpVal);
 			if(changeY)
-				y = FlxMath.lerp(y, (targetY * 1.3 * distancePerItem.y) + startPosition.y, lerpVal);
+				y = FlxMath.lerp((targetY * 1.3 * distancePerItem.y) + startPosition.y, y, lerpVal);
 		}
 		
 		if (altRotation) {

@@ -89,8 +89,13 @@ class EndlessState extends MusicBeatState
 
 		FlxCamera.defaultCameras = [camMenu];
 		
-		if (!TitleState.isPlaying)
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		if(FlxG.sound.music != null)
+			if (!FlxG.sound.music.playing)
+			{	
+				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+				FlxG.sound.music.time = 9400;
+				FlxTween.tween(FlxG.sound.music, {volume: 0.7}, 0.4);
+			}
 
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
@@ -356,7 +361,6 @@ class EndlessState extends MusicBeatState
 				if (controls.BACK)
 				{
 					MusicBeatState.switchState(new GamemodesMenuState());
-					TitleState.isPlaying = true;
 					
 					goingBack = true;
 					
@@ -415,8 +419,6 @@ class EndlessState extends MusicBeatState
 						super.update(elapsed);
 						return;
 					}
-				
-					TitleState.isPlaying = true;
 			
 					FlxG.sound.play(Paths.sound('confirmMenu'));
 

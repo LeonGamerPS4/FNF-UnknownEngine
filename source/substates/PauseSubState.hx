@@ -262,7 +262,6 @@ class PauseSubState extends MusicBeatSubstate
 				
 				Mods.loadTopMod();
 				ModifiersState.isPlayState = false;
-				states.TitleState.isPlaying = true;
 				
 				if (PlayState.isStoryMode)
 					MusicBeatState.switchState(new StoryMenuState());
@@ -294,7 +293,6 @@ class PauseSubState extends MusicBeatSubstate
 							
 							Mods.loadTopMod();
 							ModifiersState.isPlayState = false;
-							states.TitleState.isPlaying = true;
 							
 							MusicBeatState.switchState(new states.MainMenuState());
 							FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
@@ -307,7 +305,6 @@ class PauseSubState extends MusicBeatSubstate
 							
 							Mods.loadTopMod();
 							ModifiersState.isPlayState = false;
-							states.TitleState.isPlaying = true;
 							
 							MusicBeatState.switchState(new states.TitleState());
 							FlxG.sound.playMusic(Paths.music('freakyMenu'));

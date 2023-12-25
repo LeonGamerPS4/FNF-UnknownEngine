@@ -23,7 +23,7 @@ class MainMenuState extends MusicBeatState
 {
 	public static var unknownEngineVersion:String = '2.5 Beta (PUBLIC BUILD #5)'; // Used for updating and also PlayState
 	public static var micdUpVersion:String = '2.0.3';
-	public static var psychEngineVersion:String = '0.7.2';
+	public static var psychEngineVersion:String = '0.7.2h';
 
 	public static var curSelected:Int = 0;
 	public static var nightly:String = "a";
@@ -346,6 +346,7 @@ class MainMenuState extends MusicBeatState
 									{
 										PlayState.SONG.arrowSkin = null;
 										PlayState.SONG.splashSkin = null;
+										PlayState.stageUI = 'normal';
 									}
 									
 									LoadingState.loadAndSwitchState(new options.OptionsState());

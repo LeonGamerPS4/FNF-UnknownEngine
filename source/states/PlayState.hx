@@ -627,15 +627,17 @@ class PlayState extends MusicBeatState
 		playerLaneUnderlay.alpha = ClientPrefs.data.laneUnderlayOpacity;
 		playerLaneUnderlay.color = FlxColor.BLACK;
 		playerLaneUnderlay.scrollFactor.set();
-		uiGroup.add(playerLaneUnderlay);
+		playerLaneUnderlay.cameras = [camHUD];
+		add(playerLaneUnderlay);
 		
 		opponentLaneUnderlay = new FlxSprite(0, 0).makeGraphic(110 * 4 + 50, FlxG.height * 2);
 		opponentLaneUnderlay.alpha = ClientPrefs.data.laneUnderlayOpacity;
 		opponentLaneUnderlay.color = FlxColor.BLACK;
 		opponentLaneUnderlay.scrollFactor.set();
+		opponentLaneUnderlay.cameras = [camHUD];
 		
 		if (!ClientPrefs.data.middleScroll)
-			uiGroup.add(opponentLaneUnderlay);
+			add(opponentLaneUnderlay);
 
 		comboGroup = new FlxSpriteGroup();
 		add(comboGroup);
@@ -797,6 +799,7 @@ class PlayState extends MusicBeatState
 		judgementCounter.scrollFactor.set();
 		judgementCounter.screenCenter(Y);
 		judgementCounter.visible = ClientPrefs.data.judgementCounter;
+		judgementCounter.borderSize = 1.25;
 		uiGroup.add(judgementCounter);
 		
 		versionTxt = new FlxText(0, FlxG.height - 30, 0, SONG.song + " - " 
@@ -810,7 +813,7 @@ class PlayState extends MusicBeatState
 		msTimeTxt.scrollFactor.set();
 		msTimeTxt.alpha = 0;
 		msTimeTxt.visible = true;
-		msTimeTxt.borderSize = 2;
+		msTimeTxt.borderSize = 2.5;
 		uiGroup.add(msTimeTxt);
 
 		botplayTxt = new FlxText(850, timeBar.y + 670, FlxG.width - 800, "Botplay is enabled, Score won't be saved.", 32);
@@ -1551,6 +1554,12 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('onUpdateScore', [miss]);
 	}
+	
+	public static var marvelousFullRank:Bool = false;
+	public static var goodFullRank:Bool = false;
+	public static var alrightFullRank:Bool = false;
+	public static var fullRank:Bool = false;
+	public static var singleDigitRank:Bool = false;
 	
 	public dynamic function fullComboFunction()
 	{	
@@ -3020,7 +3029,7 @@ class PlayState extends MusicBeatState
 			{
 				endlessScore += songScore;
 				
-				loops++;
+				loops+1;
 
 				trace('KEEP ON PUSHIN');
 
@@ -3029,9 +3038,11 @@ class PlayState extends MusicBeatState
 				startingSong = true;
 
 				Conductor.songPosition = 0;
-				PlayState.SONG = Song.loadFromJson(SONG.song);
+				generateSong(SONG.song);
+				
 				cacheCountdown();
-				startCountdown();
+				cachePopUpScore();
+				startAndEnd();
 			}
 			
 			if (doDeathCheck() && !ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay'))
@@ -3054,21 +3065,7 @@ class PlayState extends MusicBeatState
 					}, 10);
 
 					openSubState(new RankingSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
-					
-					/*
-					Mods.loadTopMod();
-					TitleState.isPlaying = true;
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-					#if desktop DiscordClient.resetClientID(); #end
 
-					cancelMusicFadeTween();
-					if(FlxTransitionableState.skipNextTransIn) {
-						CustomFadeTransition.nextCamera = null;
-					}
-					MusicBeatState.switchState(new StoryMenuState());
-					*/
-					
-					// if ()
 					if(!ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay')) {
 						StoryMenuState.weekCompleted.set(WeekData.weeksList[storyWeek], true);
 						Highscore.saveWeekScore(WeekData.getWeekFileName(), campaignScore, storyDifficulty);
@@ -3076,7 +3073,6 @@ class PlayState extends MusicBeatState
 						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
 						FlxG.save.flush();
 					}
-					//changedDifficulty = false;
 				}
 				else
 				{
@@ -3084,9 +3080,7 @@ class PlayState extends MusicBeatState
 
 					trace('LOADING NEXT SONG');
 					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
-
-					//FlxTransitionableState.skipNextTransIn = true;
-					//FlxTransitionableState.skipNextTransOut = true;
+					
 					prevCamFollow = camFollow;
 
 					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
@@ -3110,21 +3104,6 @@ class PlayState extends MusicBeatState
 				}, 10);
 
 				openSubState(new RankingSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
-				
-				/*
-				trace('WENT BACK TO FREEPLAY??');
-				Mods.loadTopMod();
-				TitleState.isPlaying = true;
-				#if desktop DiscordClient.resetClientID(); #end
-
-				cancelMusicFadeTween();
-				if(FlxTransitionableState.skipNextTransIn) {
-					CustomFadeTransition.nextCamera = null;
-				}
-				MusicBeatState.switchState(new FreeplayState());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
-				changedDifficulty = false;
-				*/
 			}
 			transitioning = true;
 		}
@@ -4206,28 +4185,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('ratingName', ratingName);
 		setOnScripts('ratingFC', ratingFC);
 	}
-	
-	public static var marvelousFullRank:Bool = false;
-	public static var goodFullRank:Bool = false;
-	public static var alrightFullRank:Bool = false;
-	public static var fullRank:Bool = false;
-	public static var singleDigitRank:Bool = false;
-
-	/*
-	public function generateRanking(comboRank:String)
-	{	
-		if (songMisses == 0 && bads == 0 && shits == 0 && goods == 0 && marvelousFullRank) // Marvelous (SICK) Full Combo
-			RankingSubstate.comboRank = "MFC";
-		else if (songMisses == 0 && bads == 0 && shits == 0 && goods >= 1 && goodFullRank) // Good Full Combo (Nothing but Goods & Sicks)
-			RankingSubstate.comboRank = "GFC";
-		else if (songMisses == 0 && bads >= 1 && shits == 0 && goods >= 0 && fullRank) // Alright Full Combo (Bads, Goods and Sicks)
-			RankingSubstate.comboRank = "AFC";
-		else if (songMisses == 0 && fullRank) // Regular FC
-			RankingSubstate.comboRank = "FC";
-		else if (songMisses < 10 && singleDigitRank) // Single Digit Combo Breaks
-			RankingSubstate.comboRank = "SDCB";
-	}
-	*/
 
 	#if ACHIEVEMENTS_ALLOWED
 	private function checkForAchievement(achievesToCheck:Array<String> = null)

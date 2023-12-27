@@ -105,3 +105,9 @@ To fix that, install the `g++` package for your Linux Distro, names for said pac
 e.g: Fedora is `gcc-c++`, Gentoo is `sys-devel/gcc`, and so on.
 
 ---
+
+### Now that compiling's done, what do I do?
+
+Whatever the hell you want, as long as you have a good understanding of Haxe.
+
+---

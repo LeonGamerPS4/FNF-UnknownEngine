@@ -11,7 +11,7 @@ Stop using UE 1.4 and older, those versions are outdated and no longer supported
 
 ## Installation:
 
-Refer to [the Build Instructions](./BUILDING.md)
+Refer to [the Build Instructions.](./BUILDING.md)
 
 <details>
   <summary><h2>Customization</h2></summary>
@@ -29,7 +29,7 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
   <summary><h2>Credits</h2></summary>
 
 <details>
-  <summary>REDUX Team</summary>
+  <summary>Unknown Team</summary>
  
 - LeonGamer - Programmer
 - AshishXMC - Artist
@@ -44,10 +44,19 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 </details>
 
 <details>
+  <summary>Mic'd Up Team</summary>
+ 
+- Verwex - Mic'd Up itself
+- KadeDev - Additional Programmer
+- Ash237 - Additional Programmer
+</details>
+
+<details>
   <summary>Special Thanks</summary>
  
 - bbpanzu - Ex-Programmer
 - Yoshubs - Ex-Programmer
+- xenkap - Flare Engine's Menu
 - SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
 - KadeDev - Fixed some cool stuff on Chart Editor and other PRs
 - iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
@@ -56,6 +65,9 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 - Smokey - Sprite Atlas Support
 - Nebula the Zorua - some Lua reworks
 - superpowers04 - LUA JIT Fork
+- R_ - Some assets for GF's Title Screen Sprite
+- Chino's Animated - Some assets for GF's Title Screen Sprite
+- ZERO ANIMATION - Some assets for GF's Title Screen Sprite
 </details>
 </details>
 
@@ -93,6 +105,9 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 ### Week 6:
   * On Thorns, the HUD is hidden during the cutscene
   * Also there's the Background girls being spooky during the "Hey!" parts of the Instrumental
+### Week 7:
+  * In game cutscenes, unlike the NG version of FNF
+  * HUD zooms at the beginning of Ugh
 
 ## Cool new Chart Editor changes and countless bug fixes
 ![](https://github.com/ShadowMario/FNF-PsychEngine/blob/main/docs/img/chart.png?raw=true)
@@ -123,14 +138,15 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 * The engine comes with 16 example achievements that you can mess with and learn how it works (Check Achievements.hx and search for "checkForAchievement" on PlayState.hx)
 
 ## Options menu:
-* You can change Note colors, Delay and Combo Offset, Controls and Preferences there.
- * On Preferences you can toggle Downscroll, Middlescroll, Anti-Aliasing, Framerate, Low Quality, Note Splashes, Flashing Lights, etc.
+* You can change Note colors, Delay and Combo Offset, Controls, Graphics, and VFX there.
+ * On Gameplay you can toggle Downscroll, Middlescroll, Rating Systems, the Judgement counter, etc.
+ * For VFX/Graphics you can toggle Anti-Aliasing, Framerate, Low Quality, Note Splashes, Flashing Lights, etc.
 
 ## Other gameplay features:
 * When the enemy hits a note, their strum note also glows.
 * Lag doesn't impact the camera movement and player icon scaling anymore.
 * Some stuff based on Week 7's changes has been put in (Background colors on Freeplay, Note splashes)
 * You can reset your Score on Freeplay/Story Mode by pressing Reset button.
-* You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
+* You can listen to a song by pressing Space or adjust Scroll Speed/Damage taken/etc. by pressing CTRL on Freeplay.
 * You can enable "Combo Stacking" in Gameplay Options. This causes the combo sprites to just be one sprite with an animation rather than sprites spawning each note hit.
 </details>

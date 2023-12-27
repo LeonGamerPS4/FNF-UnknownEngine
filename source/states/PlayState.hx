@@ -622,15 +622,6 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 		stagesFunc(function(stage:BaseStage) stage.createPost());
-
-		comboGroup = new FlxSpriteGroup();
-		add(comboGroup);
-		noteGroup = new FlxTypedGroup<FlxBasic>();
-		add(noteGroup);
-		uiGroup = new FlxSpriteGroup();
-		add(uiGroup);
-		songBoxGroup = new FlxSpriteGroup();
-		add(songBoxGroup);
 		
 		playerLaneUnderlay = new FlxSprite(0, 0).makeGraphic(110 * 4 + 50, FlxG.height * 2);
 		playerLaneUnderlay.alpha = ClientPrefs.data.laneUnderlayOpacity;
@@ -645,6 +636,15 @@ class PlayState extends MusicBeatState
 		
 		if (!ClientPrefs.data.middleScroll)
 			uiGroup.add(opponentLaneUnderlay);
+
+		comboGroup = new FlxSpriteGroup();
+		add(comboGroup);
+		noteGroup = new FlxTypedGroup<FlxBasic>();
+		add(noteGroup);
+		uiGroup = new FlxSpriteGroup();
+		add(uiGroup);
+		songBoxGroup = new FlxSpriteGroup();
+		add(songBoxGroup);
 
 		Conductor.songPosition = -5000 / Conductor.songPosition;
 		showTime = (ClientPrefs.data.timeBarType != 'Disabled');

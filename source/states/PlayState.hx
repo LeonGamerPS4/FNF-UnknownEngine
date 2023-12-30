@@ -207,12 +207,15 @@ class PlayState extends MusicBeatState
 	public static var maxHealth:Float = 2;
 	
 	public var healthPercentageDisplay:Float = 50;
+	public var healthPercentageBar:Float = 50;
+	public var oldPercentage:Float = 50;
+	
 	public var butterBar:Float = 1;
 	public var combo:Int = 0;
 
 	public var healthBarOverlay:AttachedSprite;
 	public var healthBar:Bar;
-    public var healthStripes:FlxSprite;
+    public var healthStripes:AttachedSprite;
 	public var timeBar:Bar;
 	var songPercent:Float = 0;
 
@@ -247,9 +250,12 @@ class PlayState extends MusicBeatState
 	public var cameraSpeed:Float = 1;
 
 	public var songScore:Int = 0;
-	public var thScore:Float = 0;
+	public var theoreticalSongScore:Int = 0;
+	public var theoreticalManiaScore:Float = 0;
+	private var unranked:Bool = false;
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
+	public var ghostMisses:Int = 0;
 	public var scoreTxt:FlxText;
 	
 	public static var showTime:Bool;
@@ -370,6 +376,8 @@ class PlayState extends MusicBeatState
 		bads = ratingsData[3].hits;
 		shits = ratingsData[4].hits;
 		
+		/** RATING SYSTEM HANDLER **/
+		
 		if (ClientPrefs.data.ratingSystem == 'Default')
 		{
 			ratingStuff = [
@@ -385,6 +393,23 @@ class PlayState extends MusicBeatState
 				['&SS&', 0.95], //95%
 				['_X_', 0.99], //98%
 				['_PERFECT!!_', 1]
+			];
+		}
+		else if (ClientPrefs.data.ratingSystem == 'Default Colorless')
+		{
+			ratingStuff = [
+				['Uninstall', 0.2], //0%
+				['F', 0.3], //11%
+				['E', 0.4], //20%
+				['D', 0.5], //40%
+				['C', 0.6], //50%
+				['B', 0.69], //60%
+				['Nice', 0.7], //69%
+				['A', 0.8], //70%
+				['S', 0.9], //80%
+				['SS', 0.95], //95%
+				['X', 0.99], //98%
+				['PERFECT!!', 1] //100%
 			];
 		}
 		else if (ClientPrefs.data.ratingSystem == 'Psych')
@@ -405,22 +430,46 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.data.ratingSystem == 'Kade')
 		{
 			ratingStuff = [
-				['D', 0.6],
-				['C', 0.7],
-				['B', 0.8],
-				['A', 0.85],
-				['A.', 0.93], 
-				['A:', 0.99],
-				['AA', 0.997],
-				['AA.', 0.998],
-				['AA:', 0.999],
-				['AAA', 0.999],
-				['AAA.', 0.999],
-				['AAA:', 0.999],
-				['AAAA', 0.999], 
-				['AAAA.', 0.999], 
-				['AAAA:', 1],
-				['AAAAA', 1] //100%
+				["D", 0.401], // 40%
+				["C", 0.6], // 59%
+				["C", 0.7], // 69%
+				["B", 0.8], // 79%
+				["A", 0.86], // 85%
+				["A.", 0.9], // 89%
+				["A:", 0.96], // 95%
+				["AA", 0.976], // 97.5%
+				["AA.", 0.981], // 98%
+				["AA:", 0.986], // 98.5%
+				["AAA", 0.991], // 99%
+				["AAA.", 0.9936], // 99.35%
+				["AAA:", 0.9959], // 99.58%
+				["AAAA", 0.998], // 99.79%
+				["AAAA.", 0.9989], // 99.88%
+				["AAAA:", 0.9999], // 99.97%
+				["AAAAA", 1] // 99.99%
+			];
+		}
+		else if (ClientPrefs.data.ratingSystem == 'Andromeda') // https://github.com/nebulazorua/andromeda-engine
+		{
+			ratingStuff = [
+				["D", 0.46], // 45%
+				["D+", 0.51], // 50%
+				["C-", 0.56], // 55%
+				["C", 0.61], // 60%
+				["C+", 0.65], // 64%
+				["B-", 0.69], // 68%
+				["B", 0.73], // 72%
+				["B+", 0.77], // 76%
+				["A-", 0.81], // 80%
+				["A", 0.84], // 83%
+				["A+", 0.87], // 86%
+				["S-", 0.9], // 89%
+				["S", 0.93], // 92%
+				["S+", 0.95], // 94%
+				["☆", 0.97], // 96%
+				["☆☆", 0.99], // 98%
+				["☆☆☆", 1], // 99.99%
+				["☆☆☆☆", 1] // 100%
 			];
 		}
 
@@ -715,15 +764,15 @@ class PlayState extends MusicBeatState
 		reloadHealthBarColors();
 		uiGroup.add(healthBar);
 		
-		healthStripes = new FlxSprite().loadGraphic(Paths.image('stupidFuckingStripes'));
+		healthStripes = new AttachedSprite('stupidFuckingStripes');
 		healthStripes.y = healthBar.y;
 		healthStripes.screenCenter(X);
 		healthStripes.scrollFactor.set();
 		healthStripes.visible = !ClientPrefs.data.hideHud;
-        healthStripes.color = FlxColor.BLACK;
-		healthStripes.blend = MULTIPLY;
 		healthStripes.x = healthBar.x;
 	    healthStripes.alpha = ClientPrefs.data.healthBarAlpha;
+		healthStripes.blend = MULTIPLY;
+		healthStripes.color = FlxColor.BLACK;
 		healthStripes.antialiasing = ClientPrefs.data.antialiasing;
 		
 		if(ClientPrefs.data.stripedBar) {
@@ -1481,12 +1530,14 @@ class PlayState extends MusicBeatState
 			--i;
 		}
 	}
-	
+
 	var healthTxt:String = '';
 	var ratingSysDisplay = 'Default';
 	var str:String = "?";
 	var tempScore:String = '';
 	public static var accPercent:Float;
+	
+	var thScore:Float = 0;
 
 	// fun fact: Dynamic Functions can be overriden by just doing this
 	// `updateScore = function(miss:Bool = false) { ... }
@@ -1499,6 +1550,11 @@ class PlayState extends MusicBeatState
 			return;
 			
 		accPercent = CoolUtil.floorDecimal(ratingPercent * 100, 2);
+		
+		thScore = theoreticalSongScore;
+		
+		var usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice', false) || ClientPrefs.getGameplaySetting('botplay', false));
+		if (!unranked && (cpuControlled || practiceMode || chartingMode || usedPractice)) unranked = true;
 
 		if(totalPlayed != 0)
 		{	
@@ -1506,7 +1562,7 @@ class PlayState extends MusicBeatState
 			{
 				str = '${accPercent} % | (${ratingFC}) ' + ratingName + suffix;
 			} 
-			else if (ClientPrefs.data.scoreType == 'Psych') 
+			else if (ClientPrefs.data.scoreType == 'Psych' || ClientPrefs.data.scoreType == 'Unknown Advanced') 
 			{
 				str = ratingName + suffix + ' (${accPercent}%) - (${ratingFC})';
 			}
@@ -1520,13 +1576,24 @@ class PlayState extends MusicBeatState
 			ratingSysDisplay = 'Psych';
 		else if (ClientPrefs.data.ratingSystem == 'Kade')
 			ratingSysDisplay = 'Kade';
+		else if (ClientPrefs.data.ratingSystem == 'Andromeda')
+			ratingSysDisplay = 'Andromeda';
 		
-		healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
+		healthTxt = ' | Health: ' + style + CoolUtil.floorDecimal(health / 0.02, 0) + '%' + style;
 
 		tempScore = 'Score: ${songScore} (${thScore})' 
 		+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
 		+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
 		+ healthTxt + ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+		
+		if (ClientPrefs.data.scoreType == 'Unknown Advanced')
+		{
+			tempScore = 'Score' + (unranked ? ' *[UNRANKED]*' : "") + ': ${songScore} (${thScore})' 
+			+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
+			+ (ghostMisses > 0 && !instakillOnMiss ? ' (+${ghostMisses})' : "") 
+			+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
+			+ healthTxt + ' | Rating: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+		}
 		
 		if (ClientPrefs.data.scoreType == 'Kade') 
 		{
@@ -1573,34 +1640,52 @@ class PlayState extends MusicBeatState
 		if(songMisses < 1)
 		{
 			if (shits > 0) {
-				ratingFC = "$FC$";
+				if (ClientPrefs.data.ratingSystem == 'Default')
+					ratingFC = "$FC$";
+				else
+					ratingFC = "FC";
 				fullRank = true;
 				alrightFullRank = false;
 				goodFullRank = false;
 				marvelousFullRank = false;
 			}
 			else if (bads > 0) {
-				ratingFC = "^AFC^";
+				if (ClientPrefs.data.ratingSystem == 'Default')
+					ratingFC = "^AFC^";
+				else
+					ratingFC = 'AFC';
 				alrightFullRank = true;
 				goodFullRank = false;
 				marvelousFullRank = false;
 			}
 			else if (goods > 0) {
-				ratingFC = '&GFC&';
+				if (ClientPrefs.data.ratingSystem == 'Default')
+					ratingFC = '&GFC&';
+				else
+					ratingFC = 'GFC';
 				goodFullRank = true;
 				marvelousFullRank = false;
 			}
 			else if (sicks > 0) {
-				ratingFC = '_SFC_';
+				if (ClientPrefs.data.ratingSystem == 'Default')
+					ratingFC = '_SFC_';
+				else
+					ratingFC = 'SFC';
 				marvelousFullRank = true;
 			}
 			else if (perfects > 0) {
-				ratingFC = '*MFC*';
+				if (ClientPrefs.data.ratingSystem == 'Default')
+					ratingFC = '*MFC*';
+				else
+					ratingFC = 'MFC';
 				marvelousFullRank = true;
 			}
 		}
 		else if (songMisses < 10) {
-			ratingFC = '#SDCB#';
+			if (ClientPrefs.data.ratingSystem == 'Default')
+				ratingFC = '#SDCB#';
+			else
+				ratingFC = 'SDCB';
 			singleDigitRank = true;
 			fullRank = false;
 			alrightFullRank = false;
@@ -1609,7 +1694,10 @@ class PlayState extends MusicBeatState
 		}
 		else
 		{
-			ratingFC = '@Clear@';
+			if (ClientPrefs.data.ratingSystem == 'Default')
+				ratingFC = '@Clear@';
+			else
+				ratingFC = 'Clear';
 			singleDigitRank = false;
 			fullRank = false;
 			alrightFullRank = false;
@@ -2256,10 +2344,11 @@ class PlayState extends MusicBeatState
 			butterBar = mult;
 		}
 
-		if (healthBar.bounds.max != null && health > healthBar.bounds.max)
-			health = healthBar.bounds.max;
-			
-		healthPercentageDisplay = health / 0.02; 
+		if (health > maxHealth) health = maxHealth;
+		healthPercentageDisplay = health / 0.02; // Don't round this for smooth health bar movement
+		healthPercentageBar = healthPercentageDisplay;
+		if (oldPercentage != CoolUtil.floorDecimal(healthPercentageDisplay, 0))
+			updateScore(true);
 		
 		/** Change icon animations and when they work **/
 		
@@ -2456,16 +2545,34 @@ class PlayState extends MusicBeatState
 			iconP2.x = healthBar.barCenter - 150 + iconOffset;
 		}
 		
-		var newP1:Float;
-		var oldP2:Float = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
-		var newP2:Float;
+		if (healthPercentageBar > 100 || healthPercentageBar < 0)
+		{
+			var p2ToUse:Float = healthBar.x + (healthBar.width * (FlxMath.remapToRange((!ClientPrefs.data.smoothHealth ? health : butterBar / 2 * 100), 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 
-		newP1 = iconP1.x;
-		newP2 = iconP2.x;
-		if (healthBar.percent > 100 || healthBar.percent < 0) {
-			healthBar.offset.x = oldP2 - newP2;
-		} else {
-			healthBar.offset.x = 0;
+			if (ClientPrefs.data.iconBop == 'Bop 1')
+				p2ToUse = healthBar.x + (healthBar.width * (FlxMath.remapToRange((!ClientPrefs.data.smoothHealth ? health : butterBar / 2 * 100), 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+			else if (ClientPrefs.data.iconBop == 'Bop 2')
+				p2ToUse = healthBar.x + (healthBar.width * (FlxMath.remapToRange((!ClientPrefs.data.smoothHealth ? health : butterBar / 2 * 100), 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
+			else if (ClientPrefs.data.iconBop == 'Individual Bop')
+				p2ToUse = healthBar.x + (healthBar.width * (FlxMath.remapToRange((!ClientPrefs.data.smoothHealth ? health : butterBar / 2 * 100), 0, 100, 100, 0) * 0.01)) - 150 + iconOffset;
+		
+			if (iconP2.x - iconP2.width / 2 < healthBar.x && iconP2.x > p2ToUse)
+			{
+				healthBar.offset.x = iconP2.x - p2ToUse;
+				healthStripes.offset.x = iconP2.x - p2ToUse;
+			} 
+			else 
+			{
+				healthBar.offset.x = 0;
+				healthStripes.offset.x = 0;
+			}
+				
+			if (ClientPrefs.data.iconBop == 'Bop 1')
+				iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange((!ClientPrefs.data.smoothHealth ? health : butterBar / 2 * 100), 0, 100, 100, 0) * 0.01) + (150 * iconP1.scale.x - 150) / 2 - iconOffset);
+			else if (ClientPrefs.data.iconBop == 'Bop 2' || ClientPrefs.data.iconBop == 'Individual Bop')	
+				iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange((!ClientPrefs.data.smoothHealth ? health : butterBar / 2 * 100), 0, 100, 100, 0) * 0.01) - iconOffset);
+				
+			iconP2.x = p2ToUse;
 		}
 	}
 
@@ -2503,18 +2610,41 @@ class PlayState extends MusicBeatState
 
 		if (str == '?')
 		{	
-			tempScore = 'Score: ${songScore}  (${thScore})' 
-			+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
-			+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
-			+ healthTxt + ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+			if (ClientPrefs.data.scoreType == 'Unknown Advanced')
+			{
+				tempScore = 'Score' + (unranked ? ' *[UNRANKED]*' : "") + ': ${songScore} (${thScore})' 
+				+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
+				+ (ghostMisses > 0 && !instakillOnMiss ? ' (+${ghostMisses})' : "") 
+				+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
+				+ healthTxt + ' | Rating: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+			}
+			else
+			{
+				tempScore = 'Score: ${songScore}  (${thScore})' 
+				+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
+				+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
+				+ healthTxt + ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+			}
 		} 
 		else 
-		{		
-			tempScore = 'Score: ${songScore} (${thScore})' 
-			+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
-			+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
-			+ healthTxt + ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+		{
+			if (ClientPrefs.data.scoreType == 'Unknown Advanced')
+			{
+				tempScore = 'Score' + (unranked ? ' *[UNRANKED]*' : "") + ': ${songScore} (${thScore})' 
+				+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
+				+ (ghostMisses > 0 && !instakillOnMiss ? ' (+${ghostMisses})' : "") 
+				+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
+				+ healthTxt + ' | Rating: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+			}
+			else
+			{
+				tempScore = 'Score: ${songScore} (${thScore})' 
+				+ (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") 
+				+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") 
+				+ healthTxt + ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : "");
+			}
 		}
+		
 		
 		if (ClientPrefs.data.scoreType == 'Kade') 
 			tempScore = 'NPS: ${notesPerSecond} (Max ${maxNps}) | Score: ${songScore} | Combo Breaks: ${songMisses} | Accuracy: ${str}';
@@ -3392,6 +3522,13 @@ class PlayState extends MusicBeatState
 			spr.playAnim('pressed');
 			spr.resetAnim = 0;
 		}
+		
+		if (ClientPrefs.data.ghostTapping && totalPlayed > 0 && notes.length > 0) 
+		{
+			ghostMisses++;
+			updateScore(true);
+		}
+		
 		callOnScripts('onKeyPress', [key]);
 	}
 
@@ -3508,7 +3645,7 @@ class PlayState extends MusicBeatState
 		});
 		
 		if (daNote.hitCausesMiss) {
-			thScore += 600;
+			theoreticalSongScore += 600;
 			songMisses++;
 		}
 		
@@ -3731,7 +3868,7 @@ class PlayState extends MusicBeatState
 			doScoreBop();
 			combo++;
 			if(combo > 9999) combo = 9999;
-			thScore += 600;
+			theoreticalSongScore += 600;
 			popUpScore(note);
 		}
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
@@ -4239,19 +4376,12 @@ class PlayState extends MusicBeatState
 	function updateScoreTxt():Void 
 	{
 		var thing:Float = FlxMath.roundDecimal(ratingPercent * 10,0) * 10;
-		if (ClientPrefs.data.ratingSystem != 'Psych' && ClientPrefs.data.ratingSystem != 'Kade' && accPercent - thing < 0 && accPercent > 30 && accPercent < 99) {
+		if (ClientPrefs.data.ratingSystem != 'Psych' && ClientPrefs.data.ratingSystem != 'Kade' && ClientPrefs.data.ratingSystem != 'Andromeda' && accPercent - thing < 0 && accPercent > 30 && accPercent < 99) {
 			if (accPercent - thing > -5)
 				suffix = '+';
 			if (accPercent - thing >= -1)
 				suffix = '++';
 		}
-		
-		/*
-		var thScoreHealthTxt:String = '';
-		var accuracyTxt:String = '';
-		var pressMissesTxt:String = '';
-		var extraRatingTxt:String = '';
-		*/
 		
 		if (health <= 0) style = '=';
 		if (health > 0) style = '*';
@@ -4261,21 +4391,38 @@ class PlayState extends MusicBeatState
 		if (health >= 1.6) style = '^';
 		if (health >= 2) style = '&'; // This can be redone using the rating letters system
 		
-		healthTxt = ' | Health: ' + style + FlxMath.roundDecimal(healthPercentageDisplay, 0) + '%' + style;
+		healthTxt = ' | Health: ' + style + CoolUtil.floorDecimal(health / 0.02, 0) + '%' + style;
 
-		if (ClientPrefs.data.scoreType == 'Unknown') {
-		scoreTxt.applyMarkup('Score: ${songScore} (${thScore})' + (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") + (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") + healthTxt 
-			+ ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : ""),
-			[
-				new FlxTextFormatMarkerPair(redFormat, '*'),
-				new FlxTextFormatMarkerPair(orangeFormat, '@'),
-				new FlxTextFormatMarkerPair(yellowFormat, '#'),
-				new FlxTextFormatMarkerPair(greenFormat, '$'),
-				new FlxTextFormatMarkerPair(limeFormat, '^'),
-				new FlxTextFormatMarkerPair(cyanFormat, '&'),
-				new FlxTextFormatMarkerPair(magentaFormat, '_'),
-				new FlxTextFormatMarkerPair(blackFormat, '=')
-			]);
+		if (ClientPrefs.data.scoreType == 'Unknown') 
+		{
+			scoreTxt.applyMarkup('Score: ${songScore} (${thScore})' + (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") + (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") + healthTxt 
+				+ ' | Accuracy: ${str}' + (cpuControlled ? ' | BOTPLAY' : ""),
+				[
+					new FlxTextFormatMarkerPair(redFormat, '*'),
+					new FlxTextFormatMarkerPair(orangeFormat, '@'),
+					new FlxTextFormatMarkerPair(yellowFormat, '#'),
+					new FlxTextFormatMarkerPair(greenFormat, '$'),
+					new FlxTextFormatMarkerPair(limeFormat, '^'),
+					new FlxTextFormatMarkerPair(cyanFormat, '&'),
+					new FlxTextFormatMarkerPair(magentaFormat, '_'),
+					new FlxTextFormatMarkerPair(blackFormat, '=')
+				]);
+		}
+	
+		if (ClientPrefs.data.scoreType == 'Unknown Advanced') 
+		{
+			scoreTxt.applyMarkup('Score' + (unranked ? ' *[UNRANKED]*' : "") + ': ${songScore} (${thScore})' + (!instakillOnMiss ? ' | Misses: ${songMisses}' : "") + (ghostMisses > 0 && !instakillOnMiss ? ' (+${ghostMisses})' : "") 
+				+ (instakillOnMiss ? ' | Deaths: ${deathCounter}' : "") + healthTxt + ' | Rating: ${str}' + (cpuControlled ? ' | BOTPLAY' : ""),
+				[
+					new FlxTextFormatMarkerPair(redFormat, '*'),
+					new FlxTextFormatMarkerPair(orangeFormat, '@'),
+					new FlxTextFormatMarkerPair(yellowFormat, '#'),
+					new FlxTextFormatMarkerPair(greenFormat, '$'),
+					new FlxTextFormatMarkerPair(limeFormat, '^'),
+					new FlxTextFormatMarkerPair(cyanFormat, '&'),
+					new FlxTextFormatMarkerPair(magentaFormat, '_'),
+					new FlxTextFormatMarkerPair(blackFormat, '=')
+				]);
 		}
 		
 		if (ClientPrefs.data.scoreType == 'Kade') 

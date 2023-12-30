@@ -57,7 +57,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'Which rating system would you like to use?',
 			'ratingSystem',
 			'string',
-			['Default', 'Psych', 'Kade']);
+			['Default', 'Default Colorless', 'Psych', 'Kade', 'Andromeda']);
 		addOption(option);
 		
 		var option:Option = new Option('Auto Pause',

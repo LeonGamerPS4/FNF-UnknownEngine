@@ -97,7 +97,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What should the Score Bar display as?",
 			'scoreType',
 			'string',
-			['Unknown', 'Psych', 'Kade', 'FPS+', 'YoshiCrafter', 'Disabled']);
+			['Unknown', 'Unknown Advanced', 'Psych', 'Kade', 'FPS+', 'YoshiCrafter', 'Disabled']);
 		addOption(option);
 		
 		var option:Option = new Option('Character Icons',

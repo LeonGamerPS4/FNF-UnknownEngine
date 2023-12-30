@@ -29,9 +29,9 @@ class GamemodesMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'week', 
 		'freeplay',
-		'marathon', 
-		'endless', 
-		'survival', 
+		//'marathon', (Delayed to 2.6)
+		'endless', // WIP, Unfinished
+		//'survival', (Delayed to 2.6)
 		'modifier'];
 	private var camMenu:FlxCamera;
 		

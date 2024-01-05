@@ -37,7 +37,6 @@ class RankingSubstate extends MusicBeatSubstate
 	public static var hint:FlxText;
 	public static var comboRank:String = "NA";
 	public static var ranking:String = "NA";
-	public static var resetTheFuckingRank:Bool = false;	
 	
 	var rankingNum:Int = 15;
 
@@ -91,7 +90,7 @@ class RankingSubstate extends MusicBeatSubstate
 		press.updateHitbox();
 		add(press);
 
-		hint = new FlxText(20, 15, 0, "You passed. Try getting under 10 misses for SDCB", 32);
+		hint = new FlxText(20, 15, 0, "You passed. Try getting under 10 misses for SDCB.", 32);
 		hint.scrollFactor.set();
 		hint.setFormat(Paths.font("vcr.ttf"), 32);
 		hint.setBorderStyle(OUTLINE, 0xFF000000, 5, 1);
@@ -101,7 +100,7 @@ class RankingSubstate extends MusicBeatSubstate
 		if (comboRank == "MFC" && PlayState.marvelousFullRank)
 			hint.text = "Congrats! You're perfect!";
 		else if (comboRank == "GFC" && PlayState.goodFullRank)
-			hint.text = "You're doing great! Try getting only sicks for MFC";
+			hint.text = "You're doing great! Try getting only sicks for MFC.";
 		else if (comboRank == "FC" && PlayState.fullRank)
 			hint.text = "Good job. Try getting goods at minimum for GFC.";
 		else if (comboRank == "SDCB" && PlayState.singleDigitRank)
@@ -112,9 +111,6 @@ class RankingSubstate extends MusicBeatSubstate
 			hint.y -= 35;
 			hint.text = "If you wanna gather that rank, disable botplay.";
 		}
-		
-		//if (Highscore.resetSong(song, difficulty))
-			//ranking = "NA";
 
 		if (PlayState.deathCounter >= 30)
 		{
@@ -144,8 +140,6 @@ class RankingSubstate extends MusicBeatSubstate
 
 		if (FlxG.keys.justPressed.ANY || ClientPrefs.getGameplaySetting('practice'))
 		{
-			resetTheFuckingRank = false;
-			
 			PlayState.singleDigitRank = false;
 			PlayState.fullRank = false;
 			PlayState.alrightFullRank = false;
@@ -194,15 +188,18 @@ class RankingSubstate extends MusicBeatSubstate
 
 	function generateRanking():String
 	{	
-		if (PlayState.marvelousFullRank) // Marvelous (SICK) Full Combo
+		var isCpu:Bool = false;
+		isCpu = ClientPrefs.getGameplaySetting('botplay');
+		
+		if (PlayState.marvelousFullRank && !isCpu) // Marvelous (SICK) Full Combo
 			RankingSubstate.comboRank = "MFC";
-		else if (PlayState.goodFullRank) // Good Full Combo (Nothing but Goods & Sicks)
+		else if (PlayState.goodFullRank && !isCpu) // Good Full Combo (Nothing but Goods & Sicks)
 			RankingSubstate.comboRank = "GFC";
-		else if (PlayState.alrightFullRank) // Alright Full Combo (Bads, Goods and Sicks)
+		else if (PlayState.alrightFullRank && !isCpu) // Alright Full Combo (Bads, Goods and Sicks)
 			RankingSubstate.comboRank = "AFC";
-		else if (PlayState.fullRank) // Regular FC
+		else if (PlayState.fullRank && !isCpu) // Regular FC
 			RankingSubstate.comboRank = "FC";
-		else if (PlayState.singleDigitRank) // Single Digit Combo Breaks
+		else if (PlayState.singleDigitRank || isCpu) // Single Digit Combo Breaks
 			RankingSubstate.comboRank = "SDCB";
 			
 		// WIFE TIME :)))) (based on Wife3)
@@ -270,9 +267,6 @@ class RankingSubstate extends MusicBeatSubstate
 
 				if (PlayState.deathCounter >= 30 || PlayState.accPercent == 0)
 					ranking = "F";
-					
-				//if (Highscore.resetSong(song, difficulty))
-					//ranking = "NA";
 				break;
 			}
 		}

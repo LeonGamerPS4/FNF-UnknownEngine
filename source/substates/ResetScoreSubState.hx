@@ -92,12 +92,14 @@ class ResetScoreSubState extends MusicBeatSubstate
 			FlxG.sound.play(Paths.sound('cancelMenu'), 1);
 			close();
 		} else if(controls.ACCEPT) {
-			if(onYes) {
+			if(onYes) 
+			{
+				Highscore.resetRank(song, difficulty);
+				
 				if(week == -1) {
 					Highscore.resetSong(song, difficulty);
 				} else {
 					Highscore.resetWeek(WeekData.weeksList[week], difficulty);
-					//states.FreeplayState.rank.loadGraphic(Paths.image('rankings/NA'));
 				}
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'), 1);

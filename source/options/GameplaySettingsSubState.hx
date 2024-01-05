@@ -53,6 +53,12 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 		
+		var option:Option = new Option('Display Timing Pop Up',
+			'If checked, a popup displaying the timing of your hits will appear if late/early.',
+			'showTiming',
+			'bool');
+		addOption(option);
+		
 		var option:Option = new Option('Rating System:',
 			'Which rating system would you like to use?',
 			'ratingSystem',

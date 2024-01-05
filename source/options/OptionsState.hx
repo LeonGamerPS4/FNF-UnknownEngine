@@ -1,10 +1,5 @@
 package options;
 
-import flixel.addons.display.FlxBackdrop;
-import flixel.addons.display.FlxGridOverlay;
-
-import flixel.util.FlxGradient;
-
 import states.MainMenuState;
 import backend.StageData;
 
@@ -18,9 +13,6 @@ class OptionsState extends MusicBeatState
 	
 	private var camMenu:FlxCamera;
 	var menuMusic:FlxSound;
-	
-	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFE100, 0x0));
-	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
 	
 	var ExplainText:FlxText = new FlxText(20, 69, FlxG.width / 2, "", 48);
 
@@ -71,21 +63,12 @@ class OptionsState extends MusicBeatState
 		camMenu = initPsychCamera();
 		FlxCamera.defaultCameras = [camMenu];
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('oBG_Main'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('optBG_Main'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
-		
-		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x558DE7E5, 0xAAE6F0A9], 1, 90, true);
-		gradientBar.y = FlxG.height - gradientBar.height;
-		gradientBar.scrollFactor.set(0, 0);
-		
-		grid.velocity.set(21, 51);
-		grid.alpha = 0;
-		grid.scrollFactor.set(0, 0.07);
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});		
 
-		var side:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('Options_Side'));
+		var side:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('optSide'));
 		side.scrollFactor.x = 0;
 		side.scrollFactor.y = 0;
 		side.antialiasing = true;
@@ -102,8 +85,6 @@ class OptionsState extends MusicBeatState
 
 		bg.screenCenter();
 		add(bg);
-		add(gradientBar);
-		add(grid);
 		add(side);
 		add(ExplainText);
 
@@ -188,7 +169,7 @@ class OptionsState extends MusicBeatState
 			case "Controls":
 				ExplainText.text = "CONTROLS:\nChange your keybinds, however you want.";
 			case "Adjust Delay and Combo":
-				ExplainText.text = "ADJUST DELAY AND COMBO:\nChange the offset of the combo popup or the audio.";
+				ExplainText.text = "ADJUST DELAY AND COMBO:\nChange the offset of the combo popup or set audio delay.";
 			case "Graphics":
 				ExplainText.text = "GRAPHICS:\nChange how the graphics work in game.";
 			case "Visuals and UI":

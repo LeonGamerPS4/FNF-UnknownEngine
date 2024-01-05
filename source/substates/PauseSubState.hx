@@ -497,11 +497,13 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		for (i in 0...menuItems.length) {
-			var item = new Alphabet(0, FlxG.width/5 + (70 * i + 30), menuItems[i], true);
+			var item = new Alphabet(-500, FlxG.width/5 + (70 * i + 30), menuItems[i], true);
 			item.x += 30;
 			item.altRotation = true;
 			item.targetY = i;
 			grpMenuShit.add(item);
+			
+			FlxTween.tween(item, {x: 0}, 0.4, {ease: FlxEase.sineInOut});
 
 			if(menuItems[i] == 'Skip Time')
 			{

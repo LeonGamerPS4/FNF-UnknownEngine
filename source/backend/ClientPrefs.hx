@@ -13,6 +13,7 @@ import states.TitleState;
 	public var opponentStrums:Bool = true;
 	public var judgementCounter:Bool = true;
 	public var showMsText:Bool = true;
+	public var showTiming:Bool = true;
 	public var ratingSystem:String = 'Default';
 	public var showFPS:Bool = true;
 	public var flashing:Bool = true;

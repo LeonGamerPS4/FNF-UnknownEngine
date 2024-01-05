@@ -64,7 +64,7 @@ class ModifiersState extends MusicBeatState
 			1);
 		option.scrollSpeed = 1;
 		option.minValue = 0.5;
-		option.maxValue = 3.0;
+		option.maxValue = 10.0;
 		option.changeValue = 0.05;
 		option.displayFormat = '%vX';
 		option.decimals = 2;
@@ -114,7 +114,7 @@ class ModifiersState extends MusicBeatState
 			1);
 		option.scrollSpeed = 1.7;
 		option.minValue = 0.01;
-		option.maxValue = 2;
+		option.maxValue = 3.5;
 		option.changeValue = 0.01;
 		option.displayFormat = '%v%';
 		optionsArray.push(option);
@@ -286,12 +286,12 @@ class ModifiersState extends MusicBeatState
 		if (goption.getValue() != "constant")
 		{
 			loption.displayFormat = '%vX';
-			loption.maxValue = 3;
+			loption.maxValue = 6;
 		}
 		else
 		{
 			loption.displayFormat = "%v";
-			loption.maxValue = 6;
+			loption.maxValue = 12;
 		}
 		
 		if (controls.UI_UP_P)

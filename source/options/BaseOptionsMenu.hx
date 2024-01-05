@@ -32,6 +32,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	public var rpcTitle:String;
 
 	public var bg:FlxSprite;
+	public var side:FlxSprite;
 	
 	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x33FFE100, 0x0));
 	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
@@ -47,24 +48,19 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		DiscordClient.changePresence(rpcTitle, null);
 		#end
 		
-		bg = new FlxSprite().loadGraphic(Paths.image('oBG_Main'));
+		bg = new FlxSprite().loadGraphic(Paths.image('optBG_Main'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
-		bg.color = 0xFFea71fd;
-		bg.updateHitbox();
-		
-		gradientBar = FlxGradient.createGradientFlxSprite(Math.round(FlxG.width), 512, [0x00ff0000, 0x558DE7E5, 0xAAE6F0A9], 1, 90, true);
-		gradientBar.y = FlxG.height - gradientBar.height;
-		gradientBar.scrollFactor.set(0, 0);
-		
-		grid.velocity.set(21, 51);
-		grid.alpha = 0;
-		grid.scrollFactor.set(0, 0.07);
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});		
-
+		bg.updateHitbox();	
 		bg.screenCenter();
+		
+		side = new FlxSprite(0).loadGraphic(Paths.image('optSide_2'));
+		side.scrollFactor.x = 0;
+		side.scrollFactor.y = 0;
+		side.antialiasing = true;
+		side.x = 0;
+		
 		add(bg);
-		add(gradientBar);
-		add(grid);
+		add(side);
 
 		// avoids lagspikes while scrolling through menus!
 		grpOptions = new FlxTypedGroup<Alphabet>();

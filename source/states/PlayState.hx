@@ -218,6 +218,8 @@ class PlayState extends MusicBeatState
     public var healthStripes:AttachedSprite;
 	public var timeBar:Bar;
 	var songPercent:Float = 0;
+	
+	var blankBG:FlxSprite;
 
 	public var ratingsData:Array<Rating> = Rating.loadDefault();
 
@@ -240,6 +242,7 @@ class PlayState extends MusicBeatState
 
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
+	public var chartTxtSine:Float = 0;
 	public var chartingTxt:FlxText;
 
 	public var iconP1:HealthIcon;
@@ -873,40 +876,36 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.data.downScroll) {
 			botplayTxt.y = timeBar.y - 675;
 		}
-			
-		chartingTxt = new FlxText(400, healthBar.y - 120, FlxG.width - 800, "Player is in Charting Mode, Score won't be saved.", 32);
+		
+		chartingTxt = new FlxText(400, healthBar.y - 30, FlxG.width - 800, "/!\\ Player is in Charting Mode, Score will not be saved.", 32);
 		chartingTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		chartingTxt.scrollFactor.set();
 		chartingTxt.visible = chartingMode;
 		uiGroup.add(chartingTxt);
-		if(ClientPrefs.data.downScroll) {
-			chartingTxt.y = healthBar.y + 220;
-		}
 
 		uiGroup.cameras = [camHUD];
 		noteGroup.cameras = [camHUD];
 		comboGroup.cameras = [camHUD];
 		
-		playingTag = new FlxSprite().makeGraphic(-290, 30, 15);
+		playingTag = new FlxSprite(-290, 15).makeGraphic(315, 100);
 		playingTag.color = FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]);
-		//songBoxGroup.add(playingTag);
+		songBoxGroup.add(playingTag);
 
-		playingBox = new FlxSprite().makeGraphic(-290, 30, 15);
-		playingBox.color = FlxColor.BLACK;
-		//songBoxGroup.add(playingBox);
+		playingBox = new FlxSprite(-290, 15).makeGraphic(300, 100, 0xFF000000);
+		songBoxGroup.add(playingBox);
 	
 		playingText = new FlxText(-290, 30, FlxG.width, "Now Playing:", 300);
 		playingText.setFormat(Paths.font("vcr.ttf"), 25, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		//songBoxGroup.add(playingText);
+		songBoxGroup.add(playingText);
 		
 		playingSubText = new FlxText(-290, 60, FlxG.width, SONG.song, 300);
 		playingSubText.setFormat(Paths.font("vcr.ttf"), 30, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		//songBoxGroup.add(playingSubText);
+		songBoxGroup.add(playingSubText);
 		
 		songBoxGroup.cameras = [camOther];
 		
-		FlxTween.tween(playingTag, {x: 290}, 1, {ease: FlxEase.circInOut});
-		FlxTween.tween(playingBox, {x: 290}, 1, {ease: FlxEase.circInOut});
+		FlxTween.tween(playingTag, {x: 0}, 1, {ease: FlxEase.circInOut});
+		FlxTween.tween(playingBox, {x: 0}, 1, {ease: FlxEase.circInOut});
 		FlxTween.tween(playingText, {x: 0}, 1, {ease: FlxEase.circInOut});
 		FlxTween.tween(playingSubText, {x: 0}, 1, {ease: FlxEase.circInOut});
 		
@@ -959,7 +958,7 @@ class PlayState extends MusicBeatState
 		
 		#if desktop
 		if(!paused) {
-			MusicBeatState.windowNameSuffix = " - " + SONG.song + " " + (isStoryMode ? "(Story Mode)" : isEndless ? "(Endless)" : "(Freeplay)");
+			MusicBeatState.windowNameSuffix = " - " + SONG.song + " " + (isStoryMode ? "(Story Mode)" : isEndless ? "(Endless, Loop " + loops + ")" : "(Freeplay)");
 		} else {
 			MusicBeatState.windowNameSuffix = " - " + SONG.song + " (Paused)";
 		}
@@ -1980,12 +1979,12 @@ class PlayState extends MusicBeatState
 				makeEvent(event, i);
 
 		unspawnNotes.sort(sortByTime);
-		//allNotes = deepCopyNotes(unspawnNotes);
+		allNotes = deepCopyNotes(unspawnNotes);
 		
 		generatedMusic = true;
 	}
 	
-	/*
+	
 	function deepCopyNotes(noteArray:Array<Note>, ?startingpoint:Float = 0):Array<Note>
 	{
 		var noteRef:Note = null;
@@ -2004,7 +2003,7 @@ class PlayState extends MusicBeatState
 		}
 		return newNoteArray;
 	}
-	*/
+	
 	
 	function loopHandler(abLoop:Bool):LoopState
 	{
@@ -2318,8 +2317,8 @@ class PlayState extends MusicBeatState
 		}
 		
 		if(chartingTxt != null && chartingTxt.visible) {
-			botplaySine += 180 * elapsed;
-			chartingTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
+			chartTxtSine = (chartTxtSine + (elapsed * Math.PI * 0.75)) % (Math.PI * 2);
+			chartingTxt.alpha = (2 / 3) + (Math.sin(chartTxtSine) / 3);
 		}
 
 		if (controls.PAUSE && startedCountdown && canPause)
@@ -2378,7 +2377,7 @@ class PlayState extends MusicBeatState
 					Conductor.songPosition = loopA;
 					FlxG.sound.music.time = loopA;
 					resyncVocals();
-					//unspawnNotes = deepCopyNotes(allNotes, loopA);
+					unspawnNotes = deepCopyNotes(allNotes, loopA);
 					songScore = 0;
 					combo = 0;
 
@@ -2725,6 +2724,7 @@ class PlayState extends MusicBeatState
 			if(ret != FunkinLua.Function_Stop) {
 				FlxG.animationTimeScale = 1;
 				boyfriend.stunned = true;
+				boyfriend.visible = false;
 				deathCounter++;
 
 				paused = true;
@@ -2733,7 +2733,7 @@ class PlayState extends MusicBeatState
 
 				vocals.stop();
 				FlxG.sound.music.stop();
-
+				
 				persistentUpdate = false;
 				persistentDraw = false;
 				#if LUA_ALLOWED
@@ -2745,7 +2745,7 @@ class PlayState extends MusicBeatState
 				}
 				#end
 				openSubState(new GameOverSubstate(boyfriend.getScreenPosition().x - boyfriend.positionArray[0], boyfriend.getScreenPosition().y - boyfriend.positionArray[1], camFollow.x, camFollow.y));
-
+				
 				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if desktop
@@ -3136,8 +3136,9 @@ class PlayState extends MusicBeatState
 			updateTime = false;
 
 			deathCounter = 0;
-			seenCutscene = false;
 		}
+		
+		seenCutscene = false;
 
 		var ret:Dynamic = callOnScripts('onEndSong', null, true);
 		if(ret != FunkinLua.Function_Stop && !transitioning)
@@ -3159,7 +3160,7 @@ class PlayState extends MusicBeatState
 			{
 				endlessScore += songScore;
 				
-				loops+1;
+				loops++;
 
 				trace('KEEP ON PUSHIN');
 
@@ -3172,12 +3173,15 @@ class PlayState extends MusicBeatState
 				
 				cacheCountdown();
 				cachePopUpScore();
-				startAndEnd();
+				startCountdown();
 			}
 			
 			if (doDeathCheck() && !ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay'))
 			{
-				Highscore.saveScore(SONG.song, endlessScore, storyDifficulty, percent);
+				if (isEndless)
+					Highscore.saveEndlessScore(SONG.song, endlessScore, storyDifficulty, percent);
+				else
+					Highscore.saveScore(SONG.song, endlessScore, storyDifficulty, percent);
 			}
 			
 			else if (isStoryMode)
@@ -3257,6 +3261,7 @@ class PlayState extends MusicBeatState
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
 	public var showRating:Bool = true;
+	public var showTiming:Bool = true;
 
 	// Stores Ratings and Combo Sprites in a group
 	public var comboGroup:FlxSpriteGroup;
@@ -3310,10 +3315,12 @@ class PlayState extends MusicBeatState
 
 		var placement:Float = FlxG.width * 0.35;
 		var rating:FlxSprite = new FlxSprite();
+		var timing:FlxSprite = new FlxSprite();
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
 		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
+		var daTiming:String = "";
 
 		totalNotesHit += daRating.ratingMod;
 		note.ratingMod = daRating.ratingMod;
@@ -3333,6 +3340,11 @@ class PlayState extends MusicBeatState
 				RecalculateRating(false);
 			}
 		}
+		
+		if (noteDiff / playbackRate > Conductor.safeZoneOffset * 0.1)
+			daTiming = "early";
+		else if (noteDiff / playbackRate < Conductor.safeZoneOffset * -0.1)
+			daTiming = "late";
 
 		var uiPrefix:String = "";
 		var uiSuffix:String = '';
@@ -3356,7 +3368,23 @@ class PlayState extends MusicBeatState
 		rating.x += ClientPrefs.data.comboOffset[0];
 		rating.y -= ClientPrefs.data.comboOffset[1];
 		rating.antialiasing = antialias;
-
+		
+		if (daTiming == "")
+			timing.loadGraphic(Paths.image('empty'));
+		else
+			timing.loadGraphic(Paths.image(uiPrefix + daTiming +  uiSuffix));
+			
+		timing.screenCenter();
+		timing.x = placement - 120;
+		timing.y += 20;
+		timing.acceleration.y = 550 * playbackRate * playbackRate;
+		timing.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+		timing.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
+		timing.visible = (!ClientPrefs.data.hideHud && showTiming);
+		timing.x += ClientPrefs.data.comboOffset[4];
+		timing.y -= ClientPrefs.data.comboOffset[5];
+		timing.antialiasing = antialias;
+		
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiPrefix + 'combo' + uiSuffix));
 		comboSpr.screenCenter();
 		comboSpr.x = placement;
@@ -3369,20 +3397,28 @@ class PlayState extends MusicBeatState
 		comboSpr.y += 60;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
 		comboGroup.add(rating);
+		
+		comboGroup.add(timing);
+		
+		if (daTiming != "" && ClientPrefs.data.showTiming)
+			add(timing);
 
 		if (!PlayState.isPixelStage)
 		{
 			rating.setGraphicSize(Std.int(rating.width * 0.7));
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
+			timing.setGraphicSize(Std.int(comboSpr.width * 0.7));
 		}
 		else
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
+			timing.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
 		}
 
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
+		timing.updateHitbox();
 
 		var seperatedScore:Array<Int> = [];
 
@@ -3434,12 +3470,17 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
 			startDelay: Conductor.crochet * 0.001 / playbackRate
 		});
+		
+		FlxTween.tween(timing, {alpha: 0}, 0.2 / playbackRate, {
+			startDelay: Conductor.crochet * 0.001 / playbackRate
+		});
 
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
 			onComplete: function(tween:FlxTween)
 			{
 				comboSpr.destroy();
 				rating.destroy();
+				timing.destroy();
 			},
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
@@ -3963,8 +4004,6 @@ class PlayState extends MusicBeatState
 	}
 
 	var lastBeatHit:Int = -1;
-	var wasUp:Bool = false;
-	var wasLeft:Bool = false;
 
 	override function beatHit()
 	{
@@ -3977,10 +4016,7 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
-			
-		wasLeft = !wasLeft;
-		wasUp = !wasUp;
-		
+
 		var iconZoom:Float = ClientPrefs.data.iconZoom;
 
 		iconP1.scale.set(iconZoom, iconZoom);

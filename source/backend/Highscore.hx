@@ -20,7 +20,7 @@ class Highscore
 	public static function resetRank(song:String, diff:Int = 0):Void
 	{
 		var daSong:String = formatSong(song, diff);
-		setRank(daSong, 0);
+		setRank(formatSong(song, diff), 16);
 	}
 
 	public static function resetWeek(week:String, diff:Int = 0):Void

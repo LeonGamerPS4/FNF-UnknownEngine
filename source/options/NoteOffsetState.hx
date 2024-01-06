@@ -236,10 +236,10 @@ class NoteOffsetState extends MusicBeatState
 						FlxG.keys.justPressed.W,
 						FlxG.keys.justPressed.S,
 						
-						FlxG.keys.justPressed.J,
-						FlxG.keys.justPressed.L,
 						FlxG.keys.justPressed.I,
-						FlxG.keys.justPressed.K
+						FlxG.keys.justPressed.K,
+						FlxG.keys.justPressed.L,
+						FlxG.keys.justPressed.J
 					];
 				}
 				else

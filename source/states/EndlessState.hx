@@ -27,7 +27,6 @@ class EndlessState extends MusicBeatState
 	var lerpList:Array<Bool> = [];
 
 	var bg:FlxSprite = new FlxSprite(-89).loadGraphic(Paths.image('EndBG_Main'));
-	var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(95, 80, 190, 160, true, 0x333495EB, 0x0));
 	var gradientBar:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, 300, 0xFFAA00AA);
 	var side:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image('End_Side'));
 
@@ -135,9 +134,6 @@ class EndlessState extends MusicBeatState
 		gradientBar.y = FlxG.height - gradientBar.height;
 		add(gradientBar);
 		gradientBar.scrollFactor.set(0, 0);
-
-		grid.velocity.set(10, 25);
-		add(grid);
 		
 		side.scrollFactor.x = 0;
 		side.scrollFactor.y = 0;
@@ -367,7 +363,6 @@ class EndlessState extends MusicBeatState
 					FlxTween.tween(camMenu, {zoom: 0.6}, 0.7, {ease: FlxEase.quartInOut});
 					FlxTween.tween(camMenu, {alpha: -0.6}, 0.7, {ease: FlxEase.quartInOut});
 					FlxTween.tween(bg, {alpha: 0}, 0.7, {ease: FlxEase.quartInOut});
-					FlxTween.tween(grid, {alpha: 0}, 0.3, {ease: FlxEase.quartInOut});
 					FlxTween.tween(gradientBar, {alpha: 0}, 0.3, {ease: FlxEase.quartInOut});
 					FlxTween.tween(side, {x: -500 - side.width}, 0.3, {ease: FlxEase.quartInOut});
 					FlxTween.tween(scoreText, {alpha: 0}, 0.3, {ease: FlxEase.quartInOut});
@@ -440,7 +435,6 @@ class EndlessState extends MusicBeatState
 			bg.kill();
 			side.kill();
 			gradientBar.kill();
-			grid.kill();
 			scoreText.kill();
 			grpSongs.clear();
 			icon.kill();
@@ -468,6 +462,9 @@ class EndlessState extends MusicBeatState
 			diffText.text = lastDifficultyName.toUpperCase();
 
 		positionHighscore();
+		missingText.visible = false;
+		missingTextBG.visible = false;
+		selectable = true;
 	}
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)

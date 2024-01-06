@@ -3398,7 +3398,7 @@ class PlayState extends MusicBeatState
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
 		comboGroup.add(rating);
 		
-		comboGroup.add(timing);
+		if (ClientPrefs.data.showTiming) comboGroup.add(timing);
 		
 		if (daTiming != "" && ClientPrefs.data.showTiming)
 			add(timing);
